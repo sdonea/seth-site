@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sebastian “Seth” Donea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #141a17;
+    --wall: #1f2b26;
+    --ink: #efe8d8;
+    --muted: #a7a08f;
+    --lamp: #f3c77a;
+    --line: #34423b;
+    --tbd: #f3c77a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 "IBM Plex Mono", ui-monospace, monospace; }
+  a { color: var(--lamp); }
+  .serif { font-family: "Young Serif", Georgia, serif; font-weight: 400; }
+  header { max-width: 1200px; margin: 0 auto; padding: 32px 24px 8px; display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 40px; margin: 0; line-height: 1; }
+  header p { margin: 8px 0 0; color: var(--muted); font-size: 14px; max-width: 36em; }
+  .hint { font-size: 13px; color: var(--muted); }
+  .hint b { color: var(--lamp); font-weight: 500; }
+
+  .stage { max-width: 1200px; margin: 0 auto; padding: 16px 24px 0; position: relative; }
+  svg { width: 100%; height: auto; display: block; border-radius: 6px; }
+  .hot { cursor: pointer; outline: none; }
+  .hot .glow { opacity: 0; transition: opacity .25s; }
+  .hot:hover .glow, .hot:focus-visible .glow, .hot.on .glow { opacity: 1; }
+  .pip { fill: var(--lamp); }
+  .pip-ring { fill: none; stroke: var(--lamp); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: ping 2.4s ease-out infinite; }
+  @keyframes ping { 0% { transform: scale(1); opacity: .9 } 100% { transform: scale(3); opacity: 0 } }
+  @media (prefers-reduced-motion: reduce) { .pip-ring { animation: none; opacity: .5; } }
+
+  .panel {
+    position: absolute; top: 32px; right: 40px; width: 340px; background: #f4ecd9; color: #1d1a14;
+    padding: 22px 22px 18px; border-radius: 4px; box-shadow: 0 18px 40px rgba(0,0,0,.45);
+    transform: translateY(8px); opacity: 0; pointer-events: none; transition: .2s;
+  }
+  .panel.open { transform: none; opacity: 1; pointer-events: auto; }
+  .panel h3 { font-family: "Young Serif", serif; font-weight: 400; font-size: 26px; margin: 0 0 4px; }
+  .panel .role { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #7a6f5a; margin: 0 0 10px; }
+  .panel p { font-size: 15px; margin: 0 0 10px; }
+  .panel a { color: #9a4a12; }
+  .panel button { position: absolute; top: 10px; right: 12px; background: none; border: 0; font: inherit; font-size: 20px; cursor: pointer; color: #7a6f5a; }
+  .tbd { background: var(--tbd); color: #1d1a14; padding: 0 4px; font-size: .85em; }
+
+  .plain { max-width: 1200px; margin: 0 auto; padding: 56px 24px 96px; }
+  .plain h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 500; margin: 0 0 20px; }
+  .plain ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 48px; }
+  .plain li { padding: 20px 0; border-top: 1px solid var(--line); }
+  .plain h3 { font-family: "Young Serif", serif; font-weight: 400; font-size: 24px; margin: 0; }
+  .plain .role { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--lamp); margin: 2px 0 8px; }
+  .plain p { margin: 0 0 8px; color: #d6cfbf; font-size: 15px; }
+  .outside { margin: 32px 0 0; color: var(--muted); font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 20px 24px; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 860px) {
+    header { padding: 24px 16px 4px; }
+    header h1 { font-size: 32px; }
+    .stage { padding: 12px 16px 0; }
+    .panel { position: fixed; left: 12px; right: 12px; bottom: 12px; top: auto; width: auto; }
+    .plain { padding: 40px 16px 64px; }
+    .plain ol { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 6px; padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 class="serif">Sebastian “Seth” Donea</h1>
+    <p>This is my room in Evansville, Indiana. Most of what I'm working on is somewhere in it.</p>
+  </div>
+  <div class="hint"><b>●</b> click anything that glows, or scroll for the plain version</div>
+</header>
+
+<div class="stage">
+<svg viewBox="0 0 1200 680" role="img" aria-label="Illustration of Seth's room with clickable objects">
+  <defs>
+    <radialGradient id="lampglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f3c77a" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#f3c77a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="screenglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#9fd3c7" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#9fd3c7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- wall + floor -->
+  <rect width="1200" height="680" fill="#1f2b26"/>
+  <rect y="560" width="1200" height="120" fill="#2a211a"/>
+  <rect y="556" width="1200" height="6" fill="#3a2e24"/>
+  <circle cx="230" cy="420" r="260" fill="url(#lampglow)"/>
+
+  <!-- window: Evansville at night -->
+  <g>
+    <rect x="70" y="80" width="280" height="250" fill="#0d1624"/>
+    <circle cx="290" cy="130" r="18" fill="#e9e3cf"/>
+    <g fill="#e9e3cf" opacity=".7"><circle cx="110" cy="115" r="1.6"/><circle cx="170" cy="100" r="1.2"/><circle cx="220" cy="140" r="1.4"/><circle cx="140" cy="160" r="1"/><circle cx="250" cy="180" r="1.2"/></g>
+    <path d="M70 330 V262 h30 v-20 h24 v36 h20 v-54 h26 v54 h18 v-30 h34 v-16 h14 v46 h26 v-40 h22 v62 h22 v-28 h44 V330 Z" fill="#070c14"/>
+    <g fill="#f3c77a" opacity=".8"><rect x="152" y="238" width="4" height="5"/><rect x="162" y="250" width="4" height="5"/><rect x="250" y="276" width="4" height="5"/><rect x="108" y="270" width="4" height="5"/></g>
+    <path d="M70 318 Q210 300 350 318 V330 H70Z" fill="#132033"/>
+    <rect x="70" y="80" width="280" height="250" fill="none" stroke="#e7dcc3" stroke-width="10"/>
+    <line x1="210" y1="80" x2="210" y2="330" stroke="#e7dcc3" stroke-width="6"/>
+    <rect x="58" y="330" width="304" height="12" fill="#e7dcc3"/>
+  </g>
+
+  <!-- corkboard: Helping Hands -->
+  <g class="hot" data-key="hh" tabindex="0" role="button" aria-label="Helping Hands">
+    <rect class="glow" x="408" y="96" width="264" height="220" rx="8" fill="none" stroke="#f3c77a" stroke-width="3"/>
+    <rect x="420" y="108" width="240" height="196" fill="#a57d52"/>
+    <rect x="420" y="108" width="240" height="196" fill="none" stroke="#6e4f31" stroke-width="8"/>
+    <g transform="rotate(-4 470 170)"><rect x="440" y="130" width="90" height="64" fill="#f1ead7"/><g stroke="#b9ae93" stroke-width="2"><line x1="450" y1="150" x2="520" y2="150"/><line x1="450" y1="162" x2="512" y2="162"/><line x1="450" y1="174" x2="516" y2="174"/></g></g>
+    <g transform="rotate(3 590 190)"><rect x="548" y="142" width="92" height="110" fill="#fbf7ec"/><text x="560" y="170" font-family="IBM Plex Mono" font-size="11" fill="#5a5140">HOURS</text><g stroke="#c9bfa6" stroke-width="2"><line x1="560" y1="184" x2="626" y2="184"/><line x1="560" y1="196" x2="620" y2="196"/><line x1="560" y1="208" x2="626" y2="208"/></g><circle cx="610" cy="232" r="13" fill="none" stroke="#b8431f" stroke-width="2.5"/><path d="M603 232 l5 5 l10 -11" fill="none" stroke="#b8431f" stroke-width="2.5"/></g>
+    <g transform="rotate(-2 480 250)"><rect x="446" y="218" width="84" height="56" fill="#e9d98f"/></g>
+    <g fill="#b8431f"><circle cx="485" cy="134" r="4"/><circle cx="594" cy="146" r="4"/><circle cx="488" cy="222" r="4"/></g>
+    <circle class="pip-ring" cx="660" cy="108" r="6"/><circle class="pip" cx="660" cy="108" r="6"/>
+  </g>
+
+  <!-- whiteboard: the benchmark -->
+  <g class="hot" data-key="now" tabindex="0" role="button" aria-label="The knowledge graph benchmark">
+    <rect class="glow" x="708" y="72" width="304" height="244" rx="8" fill="none" stroke="#f3c77a" stroke-width="3"/>
+    <rect x="720" y="84" width="280" height="220" fill="#eeede6"/>
+    <rect x="720" y="84" width="280" height="220" fill="none" stroke="#9aa19b" stroke-width="6"/>
+    <g stroke="#2d5a8a" stroke-width="2.5" fill="none"><line x1="770" y1="140" x2="840" y2="120"/><line x1="770" y1="140" x2="820" y2="200"/><line x1="840" y1="120" x2="900" y2="170"/><line x1="820" y1="200" x2="900" y2="170"/><line x1="900" y1="170" x2="950" y2="120"/></g>
+    <g fill="#eeede6" stroke="#2d5a8a" stroke-width="2.5"><circle cx="770" cy="140" r="11"/><circle cx="840" cy="120" r="11"/><circle cx="820" cy="200" r="11"/><circle cx="900" cy="170" r="11"/><circle cx="950" cy="120" r="11"/></g>
+    <text x="748" y="262" font-family="IBM Plex Mono" font-size="17" fill="#b8431f">graph &gt; hybrid ?</text>
+    <line x1="748" y1="272" x2="920" y2="272" stroke="#b8431f" stroke-width="2"/>
+    <rect x="850" y="300" width="60" height="8" fill="#9aa19b"/>
+    <circle class="pip-ring" cx="1000" cy="84" r="6"/><circle class="pip" cx="1000" cy="84" r="6"/>
+  </g>
+
+  <!-- shelf: Send Energy -->
+  <g class="hot" data-key="send" tabindex="0" role="button" aria-label="Send Energy">
+    <rect class="glow" x="1026" y="176" width="156" height="100" rx="8" fill="none" stroke="#f3c77a" stroke-width="3"/>
+    <rect x="1036" y="258" width="140" height="10" fill="#6e4f31"/>
+    <g fill="#8a6a4a"><rect x="1044" y="206" width="12" height="52"/><rect x="1058" y="214" width="10" height="44" fill="#5c6f5f"/><rect x="1070" y="200" width="14" height="58" fill="#7d3b2a"/></g>
+    <rect x="1104" y="196" width="50" height="62" rx="8" fill="#f2efe8"/>
+    <rect x="1100" y="188" width="58" height="14" rx="3" fill="#ff4f00"/>
+    <rect x="1110" y="214" width="38" height="24" fill="#111"/>
+    <text x="1129" y="231" font-family="IBM Plex Mono" font-size="11" fill="#fff" text-anchor="middle">SEND</text>
+    <circle class="pip-ring" cx="1172" cy="186" r="6"/><circle class="pip" cx="1172" cy="186" r="6"/>
+  </g>
+
+  <!-- wall hook with badge: CVL -->
+  <g class="hot" data-key="cvl" tabindex="0" role="button" aria-label="Circular Venture Lab internship">
+    <rect class="glow" x="1068" y="306" width="96" height="150" rx="8" fill="none" stroke="#f3c77a" stroke-width="3"/>
+    <rect x="1108" y="318" width="16" height="8" fill="#9aa19b"/>
+    <path d="M1112 324 L1100 400 M1120 324 L1132 400" stroke="#2d5a8a" stroke-width="4" fill="none"/>
+    <rect x="1088" y="398" width="56" height="44" rx="4" fill="#f4ecd9"/>
+    <text x="1116" y="425" font-family="IBM Plex Mono" font-size="13" fill="#1d1a14" text-anchor="middle">CVL</text>
+    <circle class="pip-ring" cx="1150" cy="318" r="6"/><circle class="pip" cx="1150" cy="318" r="6"/>
+  </g>
+
+  <!-- lamp -->
+  <g>
+    <rect x="222" y="390" width="6" height="74" fill="#3b3a36"/>
+    <path d="M190 392 h70 l-16 -44 h-38 Z" fill="#d8b36a"/>
+    <rect x="200" y="462" width="50" height="8" fill="#3b3a36"/>
+  </g>
+
+  <!-- desk -->
+  <rect x="150" y="470" width="760" height="18" fill="#8a5a3b"/>
+  <rect x="170" y="488" width="14" height="80" fill="#6b442c"/>
+  <rect x="876" y="488" width="14" height="80" fill="#6b442c"/>
+  <rect x="700" y="488" width="176" height="60" fill="#7a4f34"/>
+  <rect x="780" y="512" width="20" height="4" fill="#c9a27a"/>
+
+  <!-- laptop: plain decoration -->
+  <circle cx="480" cy="420" r="140" fill="url(#screenglow)"/>
+  <rect x="396" y="364" width="170" height="104" rx="6" fill="#262a2c"/>
+  <rect x="404" y="372" width="154" height="88" fill="#0f1a17"/>
+  <g stroke-width="3" stroke-linecap="round"><line x1="414" y1="386" x2="470" y2="386" stroke="#9fd3c7"/><line x1="424" y1="398" x2="510" y2="398" stroke="#f3c77a"/><line x1="424" y1="410" x2="490" y2="410" stroke="#9fd3c7"/><line x1="414" y1="422" x2="450" y2="422" stroke="#e7dcc3"/><line x1="424" y1="434" x2="530" y2="434" stroke="#9fd3c7"/></g>
+  <path d="M380 468 h202 l-10 6 h-182 Z" fill="#3a3f42"/>
+
+  <!-- pager: PageMD -->
+  <g class="hot" data-key="pagemd" tabindex="0" role="button" aria-label="PageMD">
+    <rect class="glow" x="618" y="400" width="104" height="80" rx="8" fill="none" stroke="#f3c77a" stroke-width="3"/>
+    <rect x="630" y="420" width="80" height="48" rx="7" fill="#1b1b1b"/>
+    <rect x="638" y="428" width="50" height="22" rx="2" fill="#8fd18a"/>
+    <text x="663" y="444" font-family="IBM Plex Mono" font-size="11" fill="#1b3a1a" text-anchor="middle">PAGE</text>
+    <circle cx="698" cy="438" r="4" fill="#ff4f00"/>
+    <rect x="638" y="456" width="18" height="6" rx="2" fill="#3a3a3a"/>
+    <circle class="pip-ring" cx="710" cy="412" r="6"/><circle class="pip" cx="710" cy="412" r="6"/>
+  </g>
+
+  <!-- mug + chair -->
+  <rect x="300" y="438" width="30" height="32" rx="3" fill="#e7dcc3"/>
+  <path d="M330 446 q12 0 12 10 q0 10 -12 10" fill="none" stroke="#e7dcc3" stroke-width="4"/>
+  <g fill="#26302b"><rect x="460" y="500" width="140" height="18" rx="4"/><rect x="522" y="518" width="14" height="50"/><rect x="480" y="566" width="100" height="8" rx="4"/></g>
+</svg>
+
+<div class="panel" id="panel" role="dialog" aria-live="polite" aria-label="Details">
+  <button type="button" aria-label="Close" id="close">×</button>
+  <div id="panel-body"></div>
+</div>
+</div>
+
+<section class="plain" aria-labelledby="plain-h">
+  <h2 id="plain-h">The plain version</h2>
+  <ol>
+    <li id="pagemd">
+      <h3>PageMD</h3>
+      <div class="role">Founder · the pager on the desk</div>
+      <p>An AI agent that triages inbound calls and pages on-call staff at outpatient clinics. My mom is a doctor and her pager kept interrupting dinner. Doctors can't be taken out of the loop, so we build for the nurses and staff on the other end.</p>
+      <p>I lead a 3-person team; we're in beta at 2 clinics in Vanderburgh County. 1st at regionals, 3rd of 1,174 at the STARTedUP Challenge final, $5,500 in funding · <a href="https://pagemd.ai">pagemd.ai</a></p>
+    </li>
+    <li id="hh">
+      <h3>Helping Hands</h3>
+      <div class="role">Developer · the corkboard</div>
+      <p>Community service runs on paper and trust. Volunteers find shifts, organizations confirm hours in a two-step handshake, and every hour ends up on a signed record.</p>
+      <p>The team won the University of Evansville High School Changemaker Challenge (champion, full-tuition prize), then brought me on to build the website and platform. <a href="https://helping-hands-mu.vercel.app">helping-hands-mu.vercel.app</a></p>
+    </li>
+    <li id="send">
+      <h3>Send Energy</h3>
+      <div class="role">Operator · the jar on the shelf</div>
+      <p>Pre-workout gummies. I built the store and a custom checkout myself, and it has taken live payments since August 2026.</p>
+      <p><a href="https://lifefuel-web.vercel.app">lifefuel-web.vercel.app</a></p>
+    </li>
+    <li id="mentoring">
+      <h3>Alumni Mentoring</h3>
+      <div class="role">Founder · Signature School</div>
+      <p>My school had no alumni network, so I started one. I recruit mentors, match them with current students, and track check-ins. 22 pairs and about 100 mentoring hours so far.</p>
+    </li>
+    <li id="cvl">
+      <h3>Circular Venture Lab</h3>
+      <div class="role">Intern since June 2025 · the badge on the hook</div>
+      <p>Wrote the CultivatID healthcare talent pipeline strategy: a 20-question intake form, 4 benchmarked state programs, and 8 retention strategies. To keep going through senior year, I got my school to bring back an internship course it hadn't offered since 2003.</p>
+    </li>
+    <li id="now">
+      <h3>Does a knowledge graph actually help?</h3>
+      <div class="role">Research, starting fall 2026 · the whiteboard</div>
+      <p>Every "company brain" assumes a knowledge graph makes AI answers better. I'm measuring it: hybrid retrieval vs GraphRAG on the Rust RFC corpus, with questions I write by hand. If the graph doesn't help, that's the finding.</p>
+    </li>
+    <li id="ee">
+      <h3>Does private equity make dental care worse?</h3>
+      <div class="role">Research · IB Extended Essay</div>
+      <p>For my IB Extended Essay I coded 300 patient reviews across PE-owned and independent dental practices. Continuity of care dropped significantly at the acquired ones.</p>
+    </li>
+    <li id="mock">
+      <h3>Mock Trial</h3>
+      <div class="role">Captain · Indiana State Bar Association</div>
+      <p>Outstanding Witness from the Indiana State Bar Association. I run case strategy and witness prep, and took the team to state, where we placed top 20.</p>
+    </li>
+    <li id="yg">
+      <h3>Indiana Youth and Government</h3>
+      <div class="role">Governor's Cabinet · Indiana Statehouse</div>
+      <p>Wrote a bill that passed both chambers and was signed by the Youth Governor, which about 10 of 150 bills do. Appointed to the 4-person Governor's Cabinet from about 20 applicants.</p>
+    </li>
+    <li id="tutoring">
+      <h3>Tutoring</h3>
+      <div class="role">SAT &amp; AP Physics 1 · Elite Tutoring Place</div>
+      <p>I diagnose gaps from practice tests, write study plans, and retest weekly. 9 students, average gain of 186 SAT points.</p>
+    </li>
+  </ol>
+  <p class="outside">Outside of work: skateboarding, League of Legends, and ping-pong. I speak conversational Romanian and French.</p>
+</section>
+
+
+<footer>
+  <span>Sebastian “Seth” Donea · Signature School, class of 2027</span>
+  <span><a href="[TBD]">LinkedIn</a> · <a href="[TBD]">GitHub</a> · <a href="mailto:[TBD]">Email</a></span>
+</footer>
+
+<script>
+  const panel = document.getElementById('panel');
+  const body = document.getElementById('panel-body');
+  const hots = document.querySelectorAll('.hot');
+  function open(key) {
+    const src = document.getElementById(key);
+    body.innerHTML = src.innerHTML;
+    hots.forEach(h => h.classList.toggle('on', h.dataset.key === key));
+    panel.classList.add('open');
+  }
+  function close() { panel.classList.remove('open'); hots.forEach(h => h.classList.remove('on')); }
+  hots.forEach(h => {
+    h.addEventListener('click', () => open(h.dataset.key));
+    h.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(h.dataset.key); } });
+  });
+  document.getElementById('close').addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+</script>
+</body>
+</html>

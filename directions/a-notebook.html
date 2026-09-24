@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sebastian “Seth” Donea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4f0e6;
+    --ink: #1f1d1a;
+    --muted: #6b655b;
+    --rule: #d9d2c3;
+    --mark: #b8431f;
+    --tbd: #f2d98a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 19px/1.6 "Newsreader", Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 72px 24px 120px;
+    display: grid;
+    grid-template-columns: minmax(0, 620px) 1fr;
+    column-gap: 56px;
+  }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; letter-spacing: .02em; }
+  header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 64px; }
+  header .mono { color: var(--muted); }
+  header nav a { margin-left: 20px; }
+  a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--mark); }
+  h1 { font-weight: 500; font-size: 44px; line-height: 1.1; margin: 0 0 20px; letter-spacing: -.01em; }
+  .lede { font-size: 22px; margin: 0 0 28px; }
+  .lede em { color: var(--mark); font-style: italic; }
+  .facts { list-style: none; padding: 0; margin: 0 0 56px; border-top: 1px solid var(--rule); }
+  .facts li { padding: 10px 0; border-bottom: 1px solid var(--rule); display: flex; gap: 16px; }
+  .facts .mono { color: var(--muted); min-width: 92px; padding-top: 4px; }
+  h2 { font-weight: 500; font-size: 15px; font-family: "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 56px 0 16px; }
+  .entry { margin-bottom: 36px; }
+  .entry h3 { font-weight: 500; font-size: 24px; margin: 0 0 4px; }
+  .entry h3 small { font-weight: 400; font-size: 15px; color: var(--muted); font-family: "IBM Plex Mono", monospace; margin-left: 8px; }
+  .entry p { margin: 0 0 8px; }
+  .also { list-style: none; padding: 0; margin: 0; }
+  .also li { padding: 12px 0; border-top: 1px solid var(--rule); }
+  .also b { font-weight: 500; }
+  .side { position: relative; }
+  .note {
+    font-size: 15px; line-height: 1.5; color: var(--muted);
+    border-left: 2px solid var(--mark); padding-left: 14px; margin: 0 0 28px;
+  }
+  .note b { color: var(--ink); font-weight: 500; }
+  .photo {
+    width: 100%; max-width: 280px; aspect-ratio: 4 / 5; border: 1px dashed var(--muted);
+    display: grid; place-items: center; color: var(--muted); margin-bottom: 32px;
+    background: repeating-linear-gradient(45deg, transparent 0 10px, rgba(0,0,0,.025) 10px 20px);
+  }
+  .tbd { background: var(--tbd); padding: 0 4px; border-radius: 2px; font-family: "IBM Plex Mono", monospace; font-size: .8em; }
+  .status { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 12px; border: 1px solid var(--mark); color: var(--mark); padding: 1px 8px; border-radius: 99px; vertical-align: 3px; margin-left: 6px; }
+  footer { grid-column: 1 / -1; margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; color: var(--muted); }
+  @media (max-width: 860px) {
+    .page { grid-template-columns: 1fr; padding-top: 32px; }
+    header { margin-bottom: 40px; flex-wrap: wrap; gap: 8px; }
+    header nav a { margin: 0 16px 0 0; }
+    h1 { font-size: 36px; }
+    header { order: -2; }
+    .side { order: -1; }
+    .photo { max-width: 150px; }
+    footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <span class="mono">Evansville, Indiana</span>
+    <nav class="mono"><a href="#work">Work</a><a href="#research">Research</a><a href="mailto:[TBD]">Email</a></nav>
+  </header>
+
+  <main>
+    <h1>Sebastian “Seth” Donea</h1>
+    <p class="lede">I look for the side of a broken exchange that can actually move, and <em>build for that side</em>.</p>
+
+    <ul class="facts">
+      <li><span class="mono">Founder</span><span>PageMD, AI phone agents for outpatient clinics. In beta at 2 clinics. 1st at regionals, 3rd of 1,174 at the STARTedUP Challenge final, $5,500 in funding</span></li>
+      <li><span class="mono">Developer</span><span>Helping Hands, champion of the UE High School Changemaker Challenge. I build the platform</span></li>
+      <li><span class="mono">Operator</span><span>Send Energy, a pre-workout gummy brand with a live store taking real orders</span></li>
+      <li><span class="mono">Founder</span><span>Signature School Alumni Mentoring, 22 mentor pairs so far</span></li>
+      <li><span class="mono">Intern</span><span>Circular Venture Lab, since June 2025</span></li>
+      <li><span class="mono">Student</span><span>Signature School, class of 2027</span></li>
+    </ul>
+
+    <h2 id="work">Work</h2>
+
+    <div class="entry">
+      <h3>PageMD</h3>
+      <p>My mom is a doctor, and her pager used to interrupt dinner. Doctors can't be taken out of the loop, so we build for the nurses and staff on the other end: an AI agent that triages inbound calls and pages the on-call staff.</p>
+      <p>A 3-person team I lead, in beta at 2 outpatient clinics in Vanderburgh County. Won 1st at regionals and placed 3rd of 1,174 teams at the STARTedUP Challenge final, $5,500 in funding.</p>
+      <p><a href="https://pagemd.ai">pagemd.ai</a></p>
+    </div>
+
+    <div class="entry">
+      <h3>Helping Hands</h3>
+      <p>Community service runs on paper and trust. Helping Hands lets volunteers find shifts, has organizations confirm hours in a two-step handshake, and produces a signed record anyone can verify.</p>
+      <p>The team won the University of Evansville High School Changemaker Challenge (champion, full-tuition prize), then brought me on to build the website and platform.</p>
+      <p><a href="https://helping-hands-mu.vercel.app">helping-hands-mu.vercel.app</a></p>
+    </div>
+
+    <div class="entry">
+      <h3>Send Energy</h3>
+      <p>A consumer brand I run end to end. I built the storefront and a custom checkout myself because the stock one looked off-brand. It has been taking live payments since August 2026.</p>
+      <p><a href="https://lifefuel-web.vercel.app">lifefuel-web.vercel.app</a></p>
+    </div>
+
+    <div class="entry">
+      <h3>Signature School Alumni Mentoring</h3>
+      <p>My school had no alumni network, so I started one. I recruit mentors, match them with current students, and track check-ins. 22 pairs and about 100 mentoring hours so far.</p>
+    </div>
+
+    <div class="entry">
+      <h3>Circular Venture Lab <small>2025 –</small></h3>
+      <p>Wrote the CultivatID healthcare talent pipeline strategy: a 20-question intake form, 4 benchmarked state programs, and 8 retention strategies. To keep going through senior year, I worked with my school to bring back an internship course it hadn't offered since 2003.</p>
+    </div>
+
+    <h2 id="research">Research</h2>
+    <div class="entry">
+      <h3>Does a knowledge graph actually help? <span class="status">starting fall 2026</span></h3>
+      <p>Every "AI company brain" assumes a knowledge graph improves answers over decision records. Nobody seems to have measured it. I'm benchmarking plain hybrid retrieval against GraphRAG on the Rust RFC corpus, with hand-written questions. If the graph doesn't help, that's the result and I'll report it.</p>
+    </div>
+    <div class="entry">
+      <h3>Does private equity make dental care worse?</h3>
+      <p>For my IB Extended Essay I coded 300 patient reviews across PE-owned and independent dental practices. Continuity of care dropped significantly at the acquired ones.</p>
+    </div>
+
+    <h2>Also</h2>
+    <ul class="also">
+      <li><b>Indiana Youth and Government.</b> Wrote a bill that passed both chambers and was signed by the Youth Governor, which about 10 of 150 bills do. Appointed to the 4-person Governor's Cabinet.</li>
+      <li><b>Mock Trial captain.</b> Outstanding Witness from the Indiana State Bar Association; took the team to state and placed top 20.</li>
+      <li><b>Tutoring.</b> SAT and AP Physics 1 at Elite Tutoring Place. 9 students, average gain of 186 SAT points.</li>
+    </ul>
+  </main>
+
+  <aside class="side">
+    <div class="photo mono">your photo</div>
+    <p class="note"><b>Currently</b> applying to college for Finance and running PageMD in whatever hours remain.</p>
+    <p class="note"><b>Outside of work:</b> skateboarding, League of Legends, and ping-pong. I speak conversational Romanian and French.</p>
+  </aside>
+
+  <footer class="mono">
+    <span>Sebastian “Seth” Donea, 2026</span>
+    <span><a href="[TBD]">LinkedIn</a> · <a href="[TBD]">GitHub</a></span>
+  </footer>
+</div>
+</body>
+</html>

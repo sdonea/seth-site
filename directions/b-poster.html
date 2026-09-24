@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sebastian “Seth” Donea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ecebe6;
+    --ink: #111110;
+    --muted: #5d5c57;
+    --line: #111110;
+    --hot: #ff4f00;
+    --tbd: #ffe066;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 17px/1.5 "Archivo", system-ui, sans-serif;
+    font-variation-settings: "wdth" 100;
+  }
+  a { color: inherit; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .wrap { padding: 0 32px; }
+  .top { display: flex; justify-content: space-between; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .top nav a { margin-left: 24px; text-decoration: none; }
+  .top nav a:hover { color: var(--hot); }
+
+  .hero { display: grid; grid-template-columns: 1fr 340px; gap: 32px; padding: 40px 0 0; align-items: end; }
+  .hero-copy p { font-size: clamp(22px, 2.4vw, 34px); line-height: 1.2; font-weight: 500; max-width: 18em; margin: 0 0 32px; font-variation-settings: "wdth" 88; }
+  .hero-copy p span { color: var(--hot); }
+  .photo {
+    aspect-ratio: 4 / 5; background: #d6d4cc; display: grid; place-items: center; color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .name {
+    font-weight: 900; font-variation-settings: "wdth" 62;
+    font-size: clamp(40px, 16.5vw, 280px); line-height: .82; letter-spacing: -.02em;
+    margin: 28px 0 0; text-transform: uppercase; white-space: nowrap;
+  }
+  .strip { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 20px; }
+  .strip div { padding: 16px 16px 18px 0; }
+  .strip div + div { padding-left: 16px; border-left: 1px solid var(--line); }
+  .strip b { display: block; font-size: 20px; font-weight: 700; font-variation-settings: "wdth" 80; margin-bottom: 2px; }
+  .strip span { color: var(--muted); font-size: 14px; }
+
+  .section-head { display: flex; justify-content: space-between; padding: 72px 0 14px; border-bottom: 1px solid var(--line); }
+  .row {
+    display: grid; grid-template-columns: 64px 1.2fr 1.6fr 160px; gap: 24px;
+    padding: 26px 0; border-bottom: 1px solid var(--line); align-items: baseline;
+    transition: background .2s, padding .2s;
+  }
+  .row:hover { background: var(--ink); color: var(--bg); padding-left: 16px; padding-right: 16px; }
+  .row:hover .muted { color: #b9b8b2; }
+  .row h3 { margin: 0; font-size: clamp(32px, 4.4vw, 64px); line-height: .95; font-weight: 800; font-variation-settings: "wdth" 70; text-transform: uppercase; }
+  .row p { margin: 0; }
+  .muted { color: var(--muted); }
+  .tag { color: var(--hot); }
+  .tbd { background: var(--tbd); color: var(--ink); padding: 0 4px; font-family: "JetBrains Mono", monospace; font-size: .78em; }
+
+  .now { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 32px 0 0; }
+  .now h3 { font-size: clamp(28px, 3.2vw, 48px); line-height: 1; font-weight: 800; font-variation-settings: "wdth" 75; margin: 0; }
+  .now p { margin: 0 0 12px; font-size: 19px; }
+
+  .also { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; padding: 28px 0 0; }
+  .also b { font-size: 22px; font-weight: 800; font-variation-settings: "wdth" 75; text-transform: uppercase; }
+  .also p { margin: 6px 0 0; }
+  .outside { margin: 40px 0 0; font-size: 15px; }
+  .now + .now { border-top: 1px solid var(--line); margin-top: 32px; }
+  footer { margin-top: 96px; padding: 24px 0 32px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; }
+
+  @media (max-width: 860px) {
+    .wrap { padding: 0 16px; }
+    .top nav a { margin-left: 14px; }
+    .hero { grid-template-columns: 1fr; }
+    .photo { max-width: 220px; order: -1; }
+    .strip { grid-template-columns: 1fr 1fr; }
+    .strip div:nth-child(3) { border-left: 0; padding-left: 0; }
+    .strip div:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .row { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .row p, .row .meta { grid-column: 2; }
+    .now { grid-template-columns: 1fr; }
+    .also { grid-template-columns: 1fr; gap: 20px; }
+    footer { flex-direction: column; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top mono">
+    <span>Sebastian “Seth” Donea · Evansville, IN</span>
+    <nav><a href="#work">Work</a><a href="#research">Research</a><a href="mailto:[TBD]">Contact</a></nav>
+  </div>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p>Senior, founder, operator. I look for the side of a broken exchange that <span>can actually move</span>, and build for it.</p>
+    </div>
+    <div class="photo mono">your photo</div>
+  </section>
+
+  <h1 class="name">Sebastian<br>“Seth” Donea</h1>
+
+  <div class="strip">
+    <div><b>PageMD</b><span>Founder. 3rd of 1,174 at STARTedUP, $5,500. Beta at 2 clinics</span></div>
+    <div><b>Helping Hands</b><span>Developer. UE Changemaker Challenge champion</span></div>
+    <div><b>Send Energy</b><span>Live store, real orders</span></div>
+    <div><b>Alumni Mentoring</b><span>Founder. 22 mentor pairs</span></div>
+  </div>
+
+  <div class="section-head mono" id="work"><span>Selected work</span><span>05</span></div>
+
+  <article class="row">
+    <span class="mono">01</span>
+    <h3>PageMD</h3>
+    <p>An AI agent that triages inbound calls and pages on-call staff at outpatient clinics. We build for the nurses and staff on the other end of the pager, because doctors can't be taken out of the loop. I lead a 3-person team; we're in beta at 2 clinics in Vanderburgh County. 1st at regionals, 3rd of 1,174 at the STARTedUP Challenge final.</p>
+    <span class="mono meta"><a href="https://pagemd.ai">pagemd.ai ↗</a></span>
+  </article>
+
+  <article class="row">
+    <span class="mono">02</span>
+    <h3>Helping Hands</h3>
+    <p>Community service runs on paper and trust. Volunteers find shifts, organizations confirm hours in a two-step handshake, and every hour ends up on a signed record. The team won the University of Evansville High School Changemaker Challenge, then brought me on to build the website and platform.</p>
+    <span class="mono meta"><a href="https://helping-hands-mu.vercel.app">helping-hands-mu.vercel.app</a></span>
+  </article>
+
+  <article class="row">
+    <span class="mono">03</span>
+    <h3>Send Energy</h3>
+    <p>Pre-workout gummies. I built the store and a custom checkout myself; it has taken live payments since August 2026.</p>
+    <span class="mono meta"><a href="https://lifefuel-web.vercel.app">lifefuel-web.vercel.app</a></span>
+  </article>
+
+  <article class="row">
+    <span class="mono">04</span>
+    <h3>Alumni Mentoring</h3>
+    <p>My school had no alumni network, so I started one: I recruit mentors, match them with students, and track check-ins. 22 pairs and about 100 hours so far.</p>
+    <span class="mono meta muted">Signature School</span>
+  </article>
+
+  <article class="row">
+    <span class="mono">05</span>
+    <h3>Circular Venture Lab</h3>
+    <p>Wrote the CultivatID healthcare talent pipeline strategy: 20-question intake form, 4 benchmarked state programs, 8 retention strategies. Got my school to bring back an internship course it hadn't run since 2003 so I could keep going.</p>
+    <span class="mono meta muted">Since June 2025</span>
+  </article>
+
+  <div class="section-head mono" id="research"><span>Research</span><span class="tag">GraphRAG starts fall 2026</span></div>
+  <section class="now">
+    <h3>Does a knowledge graph actually make AI answers better?</h3>
+    <div>
+      <p>Every "company brain" product assumes it does. I haven't found anyone who measured it. I'm benchmarking hybrid retrieval against GraphRAG on the Rust RFC corpus, using questions I write by hand.</p>
+      <p class="muted">If the graph doesn't help, that's the finding.</p>
+    </div>
+  </section>
+  <section class="now">
+    <h3>Does private equity make dental care worse?</h3>
+    <div>
+      <p>My IB Extended Essay: I coded 300 patient reviews across PE-owned and independent practices. Continuity of care dropped significantly at the acquired ones.</p>
+    </div>
+  </section>
+
+  <div class="section-head mono"><span>Also</span><span></span></div>
+  <section class="also">
+    <div><b>Youth and Government</b><p>Wrote a bill that passed both chambers and was signed by the Youth Governor, which about 10 of 150 bills do. Governor's Cabinet.</p></div>
+    <div><b>Mock Trial</b><p>Captain. Outstanding Witness from the Indiana State Bar Association; top 20 at state.</p></div>
+    <div><b>Tutoring</b><p>SAT and AP Physics 1. 9 students, average gain of 186 SAT points.</p></div>
+  </section>
+  <p class="outside muted">Outside of work: skateboarding, League of Legends, ping-pong. Conversational Romanian and French.</p>
+
+  <footer class="mono">
+    <span>© 2026 Sebastian “Seth” Donea</span>
+    <span><a href="[TBD]">LinkedIn</a> · <a href="[TBD]">GitHub</a> · <a href="mailto:[TBD]">Email</a></span>
+  </footer>
+</div>
+</body>
+</html>

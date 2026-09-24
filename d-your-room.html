@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sebastian “Seth” Donea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #15181b;
+    --ink: #efe8d8;
+    --muted: #a39d90;
+    --lamp: #f3c77a;
+    --line: #2f353a;
+    --tbd: #f3c77a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 "IBM Plex Mono", ui-monospace, monospace; }
+  a { color: var(--lamp); }
+  header { max-width: 1200px; margin: 0 auto; padding: 32px 24px 8px; display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-family: "Young Serif", Georgia, serif; font-weight: 400; font-size: 40px; margin: 0; line-height: 1; }
+  header p { margin: 8px 0 0; color: var(--muted); font-size: 14px; max-width: 38em; }
+  .hint { font-size: 13px; color: var(--muted); }
+  .hint b { color: var(--lamp); font-weight: 500; }
+
+  .stage { max-width: 1200px; margin: 0 auto; padding: 16px 24px 0; position: relative; }
+  svg { width: 100%; height: auto; display: block; border-radius: 6px; }
+  .hot { cursor: pointer; outline: none; }
+  .hot .glow { opacity: 0; transition: opacity .25s; }
+  .hot:hover .glow, .hot:focus-visible .glow, .hot.on .glow { opacity: 1; }
+  .pip { fill: var(--lamp); }
+  .pip-ring { fill: none; stroke: var(--lamp); stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: ping 2.4s ease-out infinite; }
+  @keyframes ping { 0% { transform: scale(1); opacity: .9 } 100% { transform: scale(3); opacity: 0 } }
+  #switch { cursor: pointer; outline: none; }
+  #switch:focus-visible .shade { stroke: var(--lamp); stroke-width: 4; }
+  #real { opacity: 0; transition: opacity .9s ease; pointer-events: none; }
+  .lit #real { opacity: 1; }
+  .lit .pip, .lit .pip-ring { opacity: 0; }
+  .caption { position: absolute; left: 40px; bottom: 16px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,.55); padding: 4px 10px; border-radius: 3px; opacity: 0; transition: opacity .6s .5s; pointer-events: none; }
+  .lit .caption { opacity: 1; }
+  .steam { animation: steam 3.2s ease-out infinite; }
+  @keyframes steam { 0% { transform: translateY(4px); opacity: 0 } 30% { opacity: .6 } 100% { transform: translateY(-14px); opacity: 0 } }
+  .sway { animation: sway 5s ease-in-out infinite; }
+  .sway.slow { animation-duration: 7s; animation-delay: -2s; }
+  @keyframes sway { 0%, 100% { transform: rotate(-1.2deg) } 50% { transform: rotate(1.2deg) } }
+  .swing { animation: swing 3.6s ease-in-out infinite; }
+  @keyframes swing { 0%, 100% { transform: rotate(-3deg) } 50% { transform: rotate(3deg) } }
+  .blink { animation: blink 4s linear infinite; }
+  @keyframes blink { 0%, 78% { opacity: .35 } 82%, 88% { opacity: 1 } 85%, 92% { opacity: .35 } 100% { opacity: .35 } }
+  .caret { animation: caret 1.1s steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0 } }
+  .rgb { animation: rgb 4s ease-in-out infinite; }
+  @keyframes rgb { 0%, 100% { opacity: .9 } 50% { opacity: .45 } }
+  .wag { animation: wag 6s ease-in-out infinite; }
+  @keyframes wag { 0%, 86%, 100% { transform: rotate(0) } 90% { transform: rotate(9deg) } 94% { transform: rotate(-6deg) } 97% { transform: rotate(5deg) } }
+  .blades { animation: spin 2.4s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .pip-ring { animation: none; opacity: .5; } .blades, .steam, .sway, .swing, .blink, .caret, .rgb, .wag { animation: none; } #real { transition: none; } }
+
+  .panel {
+    position: absolute; top: 0; left: 0; width: 320px; background: #f4ecd9; color: #1d1a14;
+    padding: 22px 22px 18px; border-radius: 4px; box-shadow: 0 18px 40px rgba(0,0,0,.45);
+    transform: scale(.9); transform-origin: var(--ox, 0) var(--oy, 0); opacity: 0; pointer-events: none;
+    transition: transform .22s cubic-bezier(.2, .8, .3, 1.15), opacity .15s;
+  }
+  .panel.open { transform: none; opacity: 1; pointer-events: auto; }
+  .panel::before { content: ""; position: absolute; top: var(--ny, 24px); width: 14px; height: 14px; background: #f4ecd9; transform: rotate(45deg); }
+  .panel[data-side="right"]::before { left: -7px; }
+  .panel[data-side="left"]::before { right: -7px; }
+  .panel h3 { font-family: "Young Serif", serif; font-weight: 400; font-size: 26px; margin: 0 0 4px; }
+  .panel .role { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #7a6f5a; margin: 0 0 10px; }
+  .panel p { font-size: 15px; margin: 0 0 10px; }
+  .panel a { color: #9a4a12; }
+  .panel button { position: absolute; top: 10px; right: 12px; background: none; border: 0; font: inherit; font-size: 20px; cursor: pointer; color: #7a6f5a; }
+  .tbd { background: var(--tbd); color: #1d1a14; padding: 0 4px; font-size: .85em; }
+
+  .plain { max-width: 1200px; margin: 0 auto; padding: 56px 24px 96px; }
+  .plain h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 500; margin: 0 0 20px; }
+  .plain ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 48px; }
+  .plain li { padding: 20px 0; border-top: 1px solid var(--line); }
+  .plain h3 { font-family: "Young Serif", serif; font-weight: 400; font-size: 24px; margin: 0; }
+  .plain .role { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--lamp); margin: 2px 0 8px; }
+  .plain p { margin: 0 0 8px; color: #d6cfbf; font-size: 15px; }
+  .outside { margin: 32px 0 0; color: var(--muted); font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 20px 24px; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 860px) {
+    header { padding: 24px 16px 4px; }
+    header h1 { font-size: 32px; }
+    .stage { padding: 12px 16px 0; }
+    .caption { left: 24px; bottom: 8px; }
+    .panel { position: fixed; left: 12px !important; right: 12px; bottom: 12px; top: auto !important; width: auto; transform: translateY(12px); }
+    .panel::before { display: none; }
+    .plain { padding: 40px 16px 64px; }
+    .plain ol { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 6px; padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Sebastian “Seth” Donea</h1>
+    <p>This is my actual room in Evansville, Indiana. Most of what I'm working on is somewhere in it.</p>
+  </div>
+  <div class="hint"><b>●</b> click anything that glows, or scroll for the plain version</div>
+</header>
+
+<div class="stage" id="stage">
+<svg viewBox="0 0 1800 1350" role="img" aria-label="Illustration of Seth's room with clickable objects">
+  <defs>
+    <radialGradient id="lampglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f3c77a" stop-opacity=".5"/>
+      <stop offset=".45" stop-color="#f3c77a" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#f3c77a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="screenglow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7fb8e0" stop-opacity=".26"/>
+      <stop offset="1" stop-color="#7fb8e0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="floorpool" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f3c77a" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#f3c77a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ceiling" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1d20"/>
+      <stop offset="1" stop-color="#282c30"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4b3220"/>
+      <stop offset="1" stop-color="#6b4829"/>
+    </linearGradient>
+    <linearGradient id="alcove" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#34352f"/>
+      <stop offset=".6" stop-color="#46453d"/>
+      <stop offset="1" stop-color="#3a3a35"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f1f16"/>
+      <stop offset="1" stop-color="#23160f"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c99a4c"/>
+      <stop offset="1" stop-color="#9b6f30"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0e141b"/>
+      <stop offset="1" stop-color="#090c10"/>
+    </linearGradient>
+    <linearGradient id="leather" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2e2722"/>
+      <stop offset=".5" stop-color="#1b1714"/>
+      <stop offset="1" stop-color="#0f0d0b"/>
+    </linearGradient>
+    <linearGradient id="gleather" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a2a2a"/>
+      <stop offset=".55" stop-color="#141414"/>
+      <stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="redpanel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d63a30"/>
+      <stop offset="1" stop-color="#8e1f19"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe7ae"/>
+      <stop offset=".75" stop-color="#f3c16a"/>
+      <stop offset="1" stop-color="#e2a44a"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#3f7042"/>
+      <stop offset="1" stop-color="#78b06f"/>
+    </linearGradient>
+    <linearGradient id="pot" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b0764a"/>
+      <stop offset=".4" stop-color="#d69a66"/>
+      <stop offset="1" stop-color="#9a6238"/>
+    </linearGradient>
+    <linearGradient id="deskwood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a3e2d"/>
+      <stop offset="1" stop-color="#3a281d"/>
+    </linearGradient>
+    <linearGradient id="aoFloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="aoWall" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="aoCorner" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="fur" cx=".4" cy=".35" r=".7">
+      <stop offset="0" stop-color="#fbf8f2"/>
+      <stop offset=".7" stop-color="#e6e0d4"/>
+      <stop offset="1" stop-color="#c9c1b2"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx=".5" cy=".5" r=".75">
+      <stop offset=".6" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".45"/>
+    </radialGradient>
+    <filter id="bloom" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <linearGradient id="sidewall" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#2c3033"/>
+      <stop offset="1" stop-color="#1d2023"/>
+    </linearGradient>
+    <linearGradient id="cone" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffe2a0" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#ffe2a0" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter>
+    <clipPath id="roomclip"><polygon points="300,318 1800,318 1800,1350 0,1350 0,1110 300,1030"/></clipPath>
+    <clipPath id="alcoveclip"><rect x="300" y="300" width="330" height="730"/></clipPath>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6dc8a"/>
+      <stop offset=".5" stop-color="#d9b24a"/>
+      <stop offset="1" stop-color="#9a7424"/>
+    </linearGradient>
+    <linearGradient id="marble" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5a2470"/>
+      <stop offset=".5" stop-color="#b060c8"/>
+      <stop offset="1" stop-color="#4a1c5c"/>
+    </linearGradient>
+    <linearGradient id="trophywood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a4a2a"/>
+      <stop offset="1" stop-color="#4a2c1c"/>
+    </linearGradient>
+    <pattern id="rugpat" width="40" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0 10 L20 0 L40 10 L20 20 Z" fill="none" stroke="#415249" stroke-width="2"/>
+    </pattern>
+  </defs>
+
+  <!-- ceiling + walls -->
+  <rect width="1800" height="1350" fill="url(#ceiling)"/>
+  <polygon points="0,150 300,300 300,1030 0,1110" fill="url(#sidewall)"/>
+  <rect x="300" y="300" width="330" height="730" fill="url(#alcove)"/>
+  <rect x="630" y="300" width="270" height="730" fill="#171a1d"/>
+  <polygon points="630,300 705,345 705,935 630,1030" fill="#202427"/>
+  <rect x="690" y="455" width="190" height="455" fill="#2b3035"/>
+  <rect x="705" y="468" width="160" height="437" fill="#363c41"/>
+  <g fill="none" stroke="#2b3035" stroke-width="4"><rect x="722" y="488" width="56" height="100"/><rect x="792" y="488" width="56" height="100"/><rect x="722" y="606" width="56" height="130"/><rect x="792" y="606" width="56" height="130"/><rect x="722" y="754" width="56" height="130"/><rect x="792" y="754" width="56" height="130"/></g>
+  <g fill="#41474c"><rect x="724" y="490" width="52" height="4"/><rect x="794" y="490" width="52" height="4"/><rect x="724" y="608" width="52" height="4"/><rect x="794" y="608" width="52" height="4"/></g>
+  <rect x="705" y="900" width="160" height="6" fill="#f3c77a" opacity=".55"/>
+  <polygon points="690,906 880,906 910,960 660,960" fill="#f3c77a" opacity=".07"/>
+  <rect x="900" y="300" width="746" height="730" fill="#30353a"/>
+  <polygon points="1646,338 1800,280 1800,1140 1646,1030" fill="#282d31"/>
+  <line x1="300" y1="300" x2="300" y2="1030" stroke="#23272a" stroke-width="3"/>
+  <line x1="1646" y1="338" x2="1646" y2="1030" stroke="#23272a" stroke-width="3"/>
+  <polygon points="0,150 300,300 900,300 1485,300 1800,240 1800,262 1485,318 300,318 0,170" fill="#2f3337" opacity=".6"/>
+  <g fill="#4a4b45"><rect x="300" y="1012" width="330" height="18"/></g>
+  <g fill="#3a3f43"><rect x="900" y="1012" width="746" height="18"/></g>
+  <g fill="#555750"><rect x="300" y="1012" width="330" height="3"/></g>
+  <g fill="#474c50"><rect x="900" y="1012" width="746" height="3"/></g>
+  <polygon points="0,1092 300,1012 300,1030 0,1110" fill="#33383b"/>
+
+  <!-- ceiling details: vents, smoke detector -->
+  <g fill="#30353a"><rect x="420" y="262" width="110" height="18" rx="2"/><rect x="1420" y="262" width="96" height="16" rx="2"/></g>
+  <g stroke="#23272a" stroke-width="2"><line x1="430" y1="268" x2="520" y2="268"/><line x1="430" y1="274" x2="520" y2="274"/><line x1="1428" y1="268" x2="1508" y2="268"/><line x1="1428" y1="273" x2="1508" y2="273"/></g>
+  <ellipse cx="1080" cy="258" rx="26" ry="8" fill="#3a3e42"/>
+  <circle cx="1080" cy="256" r="2.5" fill="#6fcf7a"/>
+
+  <!-- floor -->
+  <polygon points="0,1110 300,1030 1646,1030 1800,1140 1800,1350 0,1350" fill="url(#floor)"/>
+  <g stroke="#5a3d27" stroke-width="3">
+    <line x1="-200" y1="1350" x2="430" y2="1030"/><line x1="220" y1="1350" x2="640" y2="1030"/><line x1="640" y1="1350" x2="850" y2="1030"/><line x1="1060" y1="1350" x2="1060" y2="1030"/><line x1="1480" y1="1350" x2="1270" y2="1030"/><line x1="1900" y1="1350" x2="1480" y2="1030"/>
+  </g>
+  <g stroke="#58392a" stroke-width="2" opacity=".8">
+    <line x1="150" y1="1170" x2="250" y2="1170"/><line x1="470" y1="1240" x2="580" y2="1240"/><line x1="780" y1="1080" x2="860" y2="1080"/><line x1="1100" y1="1300" x2="1200" y2="1300"/><line x1="1300" y1="1090" x2="1380" y2="1090"/><line x1="1560" y1="1280" x2="1660" y2="1280"/><line x1="360" y1="1320" x2="470" y2="1320"/><line x1="960" y1="1140" x2="1040" y2="1140"/>
+  </g>
+  <ellipse cx="560" cy="1140" rx="360" ry="90" fill="url(#floorpool)"/>
+
+  <!-- ambient occlusion -->
+  <rect x="0" y="1030" width="1800" height="70" fill="url(#aoFloor)"/>
+  <rect x="300" y="930" width="1346" height="82" fill="url(#aoWall)"/>
+  <rect x="300" y="300" width="46" height="730" fill="url(#aoCorner)"/>
+  <rect x="900" y="300" width="46" height="730" fill="url(#aoCorner)"/>
+  <rect x="1600" y="338" width="46" height="692" fill="url(#aoCorner)" transform="rotate(180 1623 684)"/>
+  <rect x="300" y="300" width="1346" height="40" fill="url(#aoFloor)" opacity=".6"/>
+
+  <!-- rug -->
+  <ellipse cx="880" cy="1190" rx="340" ry="92" fill="#34433e"/>
+  <ellipse cx="880" cy="1190" rx="280" ry="66" fill="url(#rugpat)"/>
+  <ellipse cx="880" cy="1190" rx="300" ry="74" fill="none" stroke="#56695f" stroke-width="5"/>
+  <ellipse cx="880" cy="1190" rx="318" ry="82" fill="none" stroke="#2c3833" stroke-width="3"/>
+  <ellipse cx="880" cy="1190" rx="345" ry="95" fill="none" stroke="#8a8474" stroke-width="3" stroke-dasharray="2 6"/>
+
+  <!-- light pools -->
+  <circle cx="525" cy="650" r="470" fill="url(#lampglow)" clip-path="url(#roomclip)"/>
+  <g clip-path="url(#alcoveclip)"><polygon points="494,606 552,606 640,300 400,300" fill="url(#cone)" filter="url(#soft)"/></g>
+  <circle cx="1220" cy="770" r="320" fill="url(#screenglow)"/>
+
+  <!-- ceiling fan -->
+  <g>
+    <rect x="983" y="96" width="14" height="70" fill="#34383c"/>
+    <g transform="translate(990 180) scale(1 0.16)">
+      <g class="blades">
+        <g id="blade"><path d="M20 -16 L330 -34 Q352 0 330 34 L20 16 Z" fill="#363b3f"/><path d="M20 -16 L330 -34 Q340 -20 338 -12 L20 -6 Z" fill="#474c50"/></g>
+        <use href="#blade" transform="rotate(72)"/>
+        <use href="#blade" transform="rotate(144)"/>
+        <use href="#blade" transform="rotate(216)"/>
+        <use href="#blade" transform="rotate(288)"/>
+      </g>
+    </g>
+    <ellipse cx="990" cy="178" rx="66" ry="22" fill="#3d4144"/>
+    <ellipse cx="990" cy="174" rx="60" ry="10" fill="#4a4e51"/>
+    <ellipse cx="990" cy="192" rx="54" ry="13" fill="#5a5d5d"/>
+    <ellipse cx="990" cy="190" rx="38" ry="6" fill="#6a6d6b"/>
+  </g>
+
+  <!-- wall details: switch, outlets, clock -->
+  <rect x="884" y="632" width="12" height="22" rx="2" fill="#4b5055"/>
+  <rect x="888" y="638" width="4" height="9" fill="#6c7176"/>
+  <rect x="1238" y="962" width="16" height="26" rx="2" fill="#474c51"/>
+  <g>
+    <circle cx="1200" cy="425" r="30" fill="#e4dfd0"/>
+    <circle cx="1200" cy="425" r="30" fill="none" stroke="#1d1d1d" stroke-width="5"/>
+    <line id="clock-m" x1="1200" y1="425" x2="1200" y2="406" stroke="#1d1d1d" stroke-width="4" stroke-linecap="round"/>
+    <line id="clock-h" x1="1200" y1="425" x2="1200" y2="412" stroke="#1d1d1d" stroke-width="3" stroke-linecap="round" transform="rotate(118 1200 425)"/>
+    <circle cx="1200" cy="425" r="3" fill="#b8431f"/>
+  </g>
+
+  <!-- hutch desk -->
+  <ellipse cx="330" cy="1104" rx="310" ry="24" fill="#000" opacity=".28"/>
+  <rect x="60" y="560" width="330" height="290" fill="url(#wood)"/>
+  <rect x="52" y="552" width="346" height="16" rx="3" fill="#3d2a1f"/>
+  <rect x="52" y="552" width="346" height="3" rx="1" fill="#5a3f2e"/>
+  <g stroke="#3a271d" stroke-width="1.5" opacity=".7"><path d="M70 600 q60 -6 120 2"/><path d="M300 730 q40 4 80 -2"/><path d="M70 790 q80 -8 160 0 q60 6 150 -2"/></g>
+  <rect x="80" y="584" width="100" height="136" fill="url(#glass)"/>
+  <polygon points="90,590 110,590 90,630" fill="#f3d8a0" opacity=".45"/>
+  <polygon points="140,590 150,590 136,640 132,640" fill="#f3d8a0" opacity=".3"/>
+  <rect x="80" y="584" width="100" height="136" fill="none" stroke="#3a271d" stroke-width="10"/>
+  <line x1="130" y1="584" x2="130" y2="720" stroke="#3a271d" stroke-width="6"/>
+  <circle cx="124" cy="660" r="3" fill="#c9a86a"/><circle cx="136" cy="660" r="3" fill="#c9a86a"/>
+  <g class="hot" data-key="ee" tabindex="0" role="button" aria-label="IB Extended Essay research">
+    <rect class="glow" x="192" y="602" width="96" height="124" rx="6" fill="none" stroke="#f3c77a" stroke-width="4"/>
+  <g>
+    <rect x="200" y="620" width="14" height="100" fill="#3f7a4a"/><rect x="200" y="640" width="14" height="4" fill="#e3c24b"/>
+    <rect x="216" y="632" width="12" height="88" fill="#c9c2b2"/><rect x="216" y="650" width="12" height="3" fill="#7a2a20"/>
+    <rect x="230" y="612" width="16" height="108" fill="#3b4a78"/><rect x="230" y="700" width="16" height="4" fill="#e4dfd0"/>
+    <rect x="248" y="640" width="12" height="80" fill="#b8431f"/>
+    <rect x="266" y="650" width="14" height="70" fill="#d9c86a" transform="rotate(12 273 685)"/>
+  </g>
+    <circle class="pip-ring" cx="206" cy="606" r="9"/><circle class="pip" cx="206" cy="606" r="9"/>
+  </g>
+  <rect x="190" y="584" width="200" height="26" fill="url(#aoFloor)"/>
+  <rect x="190" y="720" width="200" height="10" fill="#3a271d"/>
+  <rect x="190" y="720" width="200" height="2" fill="#5a3f2e"/>
+  <rect x="290" y="584" width="8" height="136" fill="#3a271d"/>
+  <g>
+    <rect x="82" y="740" width="22" height="20" fill="#8a8f96"/><rect x="82" y="740" width="22" height="4" fill="#a7acb2"/>
+    <rect x="200" y="738" width="40" height="22" rx="3" fill="#e4dfd0"/><rect x="204" y="742" width="32" height="14" fill="#7aa0b8"/>
+    <path d="M150 760 v-18 a10 10 0 0 1 20 0 v18" fill="none" stroke="#d6d2c8" stroke-width="4"/>
+  </g>
+  <rect x="60" y="760" width="330" height="10" fill="#3a271d"/>
+  <path d="M40 840 H560 Q610 840 610 862 Q610 872 590 872 H40 Z" fill="url(#deskwood)"/>
+  <path d="M40 840 H560 Q598 840 606 852 H40 Z" fill="#4a3426"/>
+  <rect x="60" y="872" width="170" height="228" fill="#26180f"/>
+  <rect x="66" y="880" width="158" height="78" fill="none" stroke="#1b110b" stroke-width="3"/>
+  <rect x="66" y="966" width="158" height="126" fill="none" stroke="#1b110b" stroke-width="3"/>
+  <g fill="#9a8a70"><rect x="120" y="916" width="50" height="7" rx="3.5"/><rect x="120" y="1024" width="50" height="7" rx="3.5"/></g>
+  <rect x="230" y="872" width="360" height="160" fill="#1f140e"/>
+  <rect x="230" y="872" width="360" height="12" fill="#150d08"/>
+
+  <!-- husky plush on the hutch -->
+  <g>
+    <ellipse cx="240" cy="552" rx="110" ry="8" fill="#000" opacity=".3"/>
+    <ellipse cx="240" cy="500" rx="92" ry="58" fill="url(#fur)"/>
+    <path d="M168 470 Q240 410 322 474 Q300 440 240 436 Q190 438 168 470Z" fill="#23262a"/>
+    <path d="M200 520 q10 8 20 0 M250 526 q10 8 20 0" stroke="#cfc8ba" stroke-width="3" fill="none"/>
+    <rect x="178" y="508" width="30" height="50" rx="14" fill="url(#fur)"/>
+    <rect x="276" y="508" width="30" height="50" rx="14" fill="url(#fur)"/>
+    <path d="M182 552 h22 M280 552 h22" stroke="#cfc8ba" stroke-width="3"/>
+    <g class="wag" style="transform-origin:326px 470px">
+    <path d="M326 470 Q372 440 350 400" stroke="#ece7dd" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M354 408 Q366 420 352 440" stroke="#23262a" stroke-width="8" fill="none" stroke-linecap="round"/>
+    </g>
+    <circle cx="170" cy="412" r="54" fill="url(#fur)"/>
+    <path d="M130 382 L138 322 L170 360 Z M180 358 L205 316 L216 374 Z" fill="#23262a"/>
+    <path d="M138 340 L146 360 L156 356 Z M198 332 L196 358 L206 362 Z" fill="#d9a0a6" opacity=".7"/>
+    <path d="M122 402 Q170 348 218 402 Q196 392 170 404 Q146 392 122 402Z" fill="#23262a"/>
+    <circle cx="152" cy="410" r="6" fill="#111"/><circle cx="188" cy="410" r="6" fill="#111"/>
+    <circle cx="154" cy="408" r="2" fill="#fff"/><circle cx="190" cy="408" r="2" fill="#fff"/>
+    <ellipse cx="170" cy="434" rx="10" ry="7" fill="#111"/>
+    <path d="M160 446 Q170 470 182 446 Z" fill="#d9707a"/>
+    <path d="M132 456 Q170 474 208 456" stroke="#b8342a" stroke-width="8" fill="none"/>
+    <circle cx="170" cy="472" r="7" fill="#e3c24b"/>
+    <circle cx="80" cy="522" r="30" fill="url(#fur)"/>
+    <path d="M56 504 L50 474 L72 494 Z M104 504 L112 474 L90 494 Z" fill="#e0782c"/>
+    <circle cx="72" cy="522" r="4" fill="#111"/><circle cx="90" cy="522" r="4" fill="#111"/>
+    <ellipse cx="81" cy="532" rx="4" ry="2.5" fill="#d9707a"/>
+  </g>
+
+  <!-- desk top: lamp, bottle, mug, notebook, plant -->
+  <path d="M322 760 a28 22 0 0 1 56 0 Z" fill="#d6d2c8"/>
+  <ellipse cx="350" cy="760" rx="24" ry="4" fill="#fff4d6" opacity=".8"/>
+  <path d="M350 760 L318 800 L350 838" stroke="#d6d2c8" stroke-width="5" fill="none"/>
+  <circle cx="318" cy="800" r="5" fill="#b9b5ab"/>
+  <rect x="332" y="834" width="36" height="7" rx="3" fill="#d6d2c8"/>
+  <g>
+    <rect x="96" y="786" width="26" height="56" rx="8" fill="#3d6f9a"/>
+    <rect x="98" y="776" width="22" height="14" rx="4" fill="#2c2c2c"/>
+    <rect x="100" y="796" width="5" height="36" rx="2" fill="#6f9ac0" opacity=".7"/>
+  </g>
+  <g>
+    <rect x="150" y="806" width="28" height="34" rx="4" fill="#e4dfd0"/>
+    <path d="M178 814 q14 0 14 10 q0 10 -14 10" fill="none" stroke="#e4dfd0" stroke-width="5"/>
+    <path d="M158 800 q-6 -10 2 -18 M168 800 q-6 -10 2 -18" class="steam" stroke="#cfc8ba" stroke-width="2" fill="none" opacity=".5"/>
+  </g>
+  <g transform="rotate(-6 250 832)">
+    <rect x="212" y="822" width="80" height="16" rx="2" fill="#2d4a3a"/>
+    <rect x="212" y="818" width="80" height="6" rx="2" fill="#e4dfd0"/>
+    <line x1="280" y1="816" x2="296" y2="800" stroke="#e3c24b" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <path d="M540 842 h36 l-5 -34 h-26 Z" fill="url(#pot)"/>
+  <rect x="540" y="806" width="36" height="6" rx="2" fill="#b0764a"/>
+  <g class="sway" style="transform-origin:558px 808px">
+  <path d="M558 808 q-26 -40 -6 -70 q8 30 6 70 M558 808 q20 -44 44 -52 q-10 34 -44 52 M558 808 q-34 -18 -46 -46 q30 6 46 46" fill="url(#leaf)"/>
+  <path d="M558 808 q-12 -30 -6 -66 M558 808 q18 -30 40 -48 M558 808 q-24 -16 -42 -42" stroke="#3f7042" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- floor lamp: the easter egg switch -->
+  <g id="switch" tabindex="0" role="button" aria-label="Turn on the lights" aria-pressed="false">
+    <rect x="470" y="580" width="110" height="262" fill="transparent"/>
+    <line x1="522" y1="712" x2="522" y2="842" stroke="#b8b3a5" stroke-width="5"/>
+    <polygon class="shade" points="492,604 554,604 562,714 484,714" fill="url(#shade)"/>
+    <polygon points="492,604 506,604 498,714 484,714" fill="#ffe2a0" opacity=".7"/>
+    <polygon points="486,694 561,694 562,714 484,714" fill="#d9a14a"/>
+    <ellipse cx="523" cy="604" rx="31" ry="4" fill="#fff4d6"/>
+  </g>
+
+  <!-- office chair, tucked in -->
+  <g>
+    <ellipse cx="660" cy="1152" rx="130" ry="20" fill="#000" opacity=".32"/>
+    <rect x="590" y="760" width="160" height="230" rx="38" fill="url(#leather)"/>
+    <path d="M604 800 q4 -26 30 -32 M606 830 v120" stroke="#4a4038" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+    <rect x="596" y="766" width="148" height="218" rx="34" fill="none" stroke="#2a231e" stroke-width="3"/>
+    <rect x="608" y="778" width="124" height="26" rx="12" fill="#2b241f"/>
+    <g stroke="#2a231e" stroke-width="3"><line x1="604" y1="850" x2="736" y2="850"/><line x1="604" y1="910" x2="736" y2="910"/></g>
+    <path d="M608 790 q10 -14 30 -16" stroke="#3a322b" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <rect x="572" y="930" width="30" height="16" rx="8" fill="#241e1a"/>
+    <rect x="738" y="930" width="30" height="16" rx="8" fill="#241e1a"/>
+    <rect x="652" y="990" width="16" height="110" fill="#141414"/>
+    <rect x="654" y="990" width="4" height="110" fill="#2a2a2a"/>
+    <path d="M660 1100 l-90 44 M660 1100 l-20 56 M660 1100 l70 48 M660 1100 l100 12" stroke="#2c1d14" stroke-width="12" stroke-linecap="round"/>
+    <g fill="#111"><circle cx="570" cy="1146" r="10"/><circle cx="640" cy="1158" r="10"/><circle cx="732" cy="1150" r="10"/><circle cx="762" cy="1114" r="10"/></g>
+  </g>
+
+  <!-- right wall: ribbons + posters -->
+  <g class="hot" data-key="yg" tabindex="0" role="button" aria-label="Indiana Youth and Government">
+    <rect class="glow" x="912" y="474" width="58" height="84" rx="6" fill="none" stroke="#f3c77a" stroke-width="4"/>
+  <rect x="922" y="484" width="16" height="66" fill="#2c5aa8"/>
+  <rect x="922" y="496" width="16" height="10" fill="#e4dfd0" opacity=".8"/>
+  <path d="M922 550 l8 -10 l8 10 Z" fill="#30353a"/>
+  <rect x="944" y="484" width="16" height="66" fill="#e0782c"/>
+  <rect x="944" y="496" width="16" height="10" fill="#e4dfd0" opacity=".8"/>
+  <path d="M944 550 l8 -10 l8 10 Z" fill="#30353a"/>
+    <circle class="pip-ring" cx="916" cy="478" r="9"/><circle class="pip" cx="916" cy="478" r="9"/>
+  </g>
+  <g>
+    <rect x="1140" y="540" width="112" height="124" fill="#22262c"/>
+    <rect x="1148" y="548" width="96" height="76" fill="#2e343c"/>
+    <circle cx="1196" cy="578" r="16" fill="#1a1d22"/>
+    <rect x="1182" y="594" width="28" height="30" fill="#1a1d22"/>
+    <g fill="#e4dfd0" opacity=".6"><rect x="1150" y="636" width="60" height="4"/><rect x="1150" y="646" width="40" height="3"/></g>
+    <rect x="1262" y="520" width="84" height="132" fill="#d68f45"/>
+    <path d="M1262 560 q20 -12 42 0 q22 12 42 0 v20 h-84 Z" fill="#e8b25a"/>
+    <circle cx="1304" cy="552" r="14" fill="#f6d27a"/>
+    <rect x="1262" y="620" width="84" height="32" fill="#e8b23a"/>
+    <g fill="#c98a1a"><circle cx="1276" cy="634" r="6"/><circle cx="1296" cy="640" r="6"/><circle cx="1318" cy="632" r="6"/><circle cx="1336" cy="640" r="6"/></g>
+    <rect x="1356" y="520" width="78" height="120" fill="#c98f7a"/>
+    <circle cx="1395" cy="572" r="22" fill="#b8342a"/>
+    <rect x="1376" y="592" width="38" height="40" rx="10" fill="#8a2a22"/>
+    <g fill="#e4dfd0" opacity=".55"><rect x="1136" y="536" width="16" height="7" transform="rotate(-20 1144 540)"/><rect x="1240" y="536" width="16" height="7" transform="rotate(20 1248 540)"/><rect x="1258" y="516" width="16" height="7" transform="rotate(-20 1266 520)"/><rect x="1422" y="516" width="16" height="7" transform="rotate(20 1430 520)"/></g>
+  </g>
+
+  <!-- floor plant by the gaming desk -->
+  <g>
+    <ellipse cx="955" cy="1034" rx="46" ry="9" fill="#000" opacity=".3"/>
+    <path d="M925 1030 h60 l-8 -64 h-44 Z" fill="url(#pot)"/>
+    <path d="M925 1030 h14 l-4 -64 h-2 Z" fill="#b0764a"/>
+    <rect x="928" y="962" width="54" height="8" rx="3" fill="#b0764a"/>
+    <g class="sway slow" style="transform-origin:955px 966px">
+    <path d="M955 966 q-50 -60 -30 -130 q24 60 30 130 M955 966 q40 -90 80 -100 q-14 64 -80 100 M955 966 q-60 -30 -80 -80 q52 10 80 80 M955 966 q6 -90 -6 -160 q34 60 6 160" fill="url(#leaf)"/>
+    <path d="M955 966 q-40 -40 -44 -112 M955 966 q36 -60 74 -94 M955 966 q-44 -24 -72 -70 M955 966 q4 -70 -4 -148" stroke="#3f7042" stroke-width="2.5" fill="none"/>
+    <path d="M955 966 q-20 -40 10 -90 q10 50 -10 90" fill="#4f8a55"/>
+    </g>
+  </g>
+
+  <!-- gaming desk + tower -->
+  <ellipse cx="1260" cy="1108" rx="270" ry="20" fill="#000" opacity=".28"/>
+  <rect x="1402" y="688" width="118" height="158" rx="4" fill="#111214"/>
+  <rect x="1410" y="696" width="80" height="142" rx="3" fill="#15181c"/>
+  <g class="rgb" fill="none" stroke="#d0443a" stroke-width="3" opacity=".9" filter="url(#bloom)"><circle cx="1450" cy="730" r="16"/><circle cx="1450" cy="770" r="16"/><circle cx="1450" cy="810" r="16"/></g>
+  <g fill="#b8342a" opacity=".35"><circle cx="1450" cy="730" r="5"/><circle cx="1450" cy="770" r="5"/><circle cx="1450" cy="810" r="5"/></g>
+  <rect x="1500" y="700" width="5" height="136" fill="#b8342a" opacity=".8"/>
+
+  <!-- Changemaker trophy on the PC: Helping Hands -->
+  <g class="hot" data-key="hh" tabindex="0" role="button" aria-label="Helping Hands">
+    <rect class="glow" x="1428" y="500" width="84" height="192" rx="8" fill="none" stroke="#f3c77a" stroke-width="4"/>
+    <ellipse cx="1470" cy="688" rx="40" ry="5" fill="#000" opacity=".35"/>
+    <rect x="1436" y="666" width="68" height="22" rx="2" fill="url(#trophywood)"/>
+    <rect x="1436" y="666" width="68" height="3" fill="#9a6a44"/>
+    <rect x="1440" y="656" width="60" height="10" rx="2" fill="#4a2c1c"/>
+    <rect x="1446" y="584" width="13" height="72" fill="url(#marble)"/>
+    <rect x="1481" y="584" width="13" height="72" fill="url(#marble)"/>
+    <path d="M1448 596 q6 10 0 20 q-4 10 4 22 M1484 600 q6 12 -2 22 q-4 12 4 24" stroke="#e6b8f0" stroke-width="1.5" fill="none" opacity=".7"/>
+    <circle cx="1470" cy="640" r="9" fill="url(#gold)"/>
+    <circle cx="1470" cy="640" r="5" fill="#8a6a2a"/>
+    <rect x="1438" y="574" width="64" height="10" rx="2" fill="#4a2c1c"/>
+    <rect x="1466" y="556" width="8" height="18" fill="url(#gold)"/>
+    <path d="M1456 540 h28 q0 18 -14 20 q-14 -2 -14 -20 Z" fill="url(#gold)"/>
+    <circle cx="1470" cy="530" r="6" fill="url(#gold)"/>
+    <path d="M1466 530 q-18 -14 -20 -26 q12 6 20 18 M1474 530 q18 -14 20 -26 q-12 6 -20 18" fill="url(#gold)"/>
+    <rect x="1458" y="542" width="4" height="12" fill="#fff2c0" opacity=".6"/>
+    <circle class="pip-ring" cx="1506" cy="512" r="9"/><circle class="pip" cx="1506" cy="512" r="9"/>
+  </g>
+
+  <!-- monitor: the benchmark -->
+  <g class="hot" data-key="now" tabindex="0" role="button" aria-label="The knowledge graph benchmark">
+    <rect class="glow" x="1038" y="690" width="366" height="160" rx="8" fill="none" stroke="#f3c77a" stroke-width="4"/>
+    <rect x="1046" y="698" width="350" height="144" rx="5" fill="#1a1c1f"/>
+    <rect x="1050" y="702" width="342" height="136" rx="4" fill="url(#screen)"/>
+    <g stroke="#2a3542" stroke-width="3" stroke-linecap="round"><line x1="1066" y1="820" x2="1120" y2="820"/><line x1="1128" y1="820" x2="1170" y2="820"/><line x1="1280" y1="810" x2="1360" y2="810"/><line x1="1280" y1="822" x2="1340" y2="822"/></g>
+    <g stroke="#5fa0d8" stroke-width="3" fill="none" filter="url(#bloom)"><line x1="1095" y1="758" x2="1155" y2="732"/><line x1="1095" y1="758" x2="1145" y2="798"/><line x1="1155" y1="732" x2="1215" y2="772"/><line x1="1145" y1="798" x2="1215" y2="772"/><line x1="1215" y1="772" x2="1260" y2="732"/></g>
+    <g class="graph-nodes" fill="#0b0f14" stroke="#5fa0d8" stroke-width="3" filter="url(#bloom)"><circle cx="1095" cy="758" r="9"/><circle cx="1155" cy="732" r="9"/><circle cx="1145" cy="798" r="9"/><circle cx="1215" cy="772" r="9"/><circle cx="1260" cy="732" r="9"/></g>
+    <circle id="walker" cx="1215" cy="772" r="5" fill="#f3c77a" filter="url(#bloom)"/>
+    <text x="1280" y="766" font-family="IBM Plex Mono" font-size="17" fill="#f3c77a">graph</text>
+    <text x="1280" y="788" font-family="IBM Plex Mono" font-size="17" fill="#f3c77a">&gt; hybrid?</text>
+    <rect class="caret" x="1374" y="775" width="9" height="17" fill="#f3c77a"/>
+    <polygon points="1050,702 1110,702 1060,838 1050,838" fill="#fff" opacity=".03"/>
+    <circle class="pip-ring" cx="1392" cy="702" r="9"/><circle class="pip" cx="1392" cy="702" r="9"/>
+  </g>
+  <path d="M1206 842 h30 l8 12 h-46 Z" fill="#1a1a1a"/>
+  <polygon points="1020,852 1520,848 1520,870 1028,880" fill="#0f0f10"/>
+  <polygon points="1060,846 1400,843 1404,852 1062,856" fill="#1e1a1b"/>
+  <polygon points="1060,846 1400,843 1400,845 1060,848" fill="#a3281f"/>
+  <rect x="1150" y="842" width="120" height="8" rx="2" fill="#26282b"/>
+  <rect x="1150" y="849" width="120" height="2" fill="#5fa0d8" opacity=".7"/>
+  <ellipse cx="1300" cy="846" rx="10" ry="5" fill="#2a2c30"/>
+  <g transform="translate(-318 0)">
+    <rect x="1350" y="782" width="6" height="62" fill="#222"/>
+    <rect x="1336" y="840" width="34" height="6" rx="2" fill="#222"/>
+    <path d="M1332 800 a21 22 0 0 1 42 0" fill="none" stroke="#2c2c2c" stroke-width="8"/>
+    <rect x="1326" y="798" width="12" height="22" rx="5" fill="#2c2c2c"/>
+    <rect x="1368" y="798" width="12" height="22" rx="5" fill="#2c2c2c"/>
+  </g>
+  <polygon points="1028,874 1520,866 1520,872 1030,880" fill="#a3281f"/>
+  <rect x="1050" y="878" width="14" height="228" fill="#101010"/>
+  <rect x="1480" y="870" width="14" height="236" fill="#101010"/>
+  <path d="M1244 878 q-6 50 4 96 M1252 878 q0 50 2 96 M1260 878 q8 50 0 96" stroke="#1b1b1b" stroke-width="4" fill="none"/>
+
+  <!-- gaming chair -->
+  <g>
+    <ellipse cx="1480" cy="1208" rx="160" ry="20" fill="#000" opacity=".32"/>
+    <path d="M1520 750 q72 -34 140 8 l-12 256 h-122 Z" fill="url(#gleather)"/>
+    <path d="M1520 750 q18 -8 36 -12 l-8 276 h-22 Z M1660 758 q-16 -12 -34 -18 l-4 274 h26 Z" fill="url(#redpanel)"/>
+    <path d="M1532 760 q8 -6 16 -8 l-6 120" stroke="#f07a6a" stroke-width="3" fill="none" opacity=".5"/>
+    <path d="M1558 740 l-6 270 M1624 740 l-4 270" stroke="#2a2a2a" stroke-width="2" stroke-dasharray="6 5"/>
+    <rect x="1560" y="760" width="62" height="28" rx="12" fill="#1f1f1f"/>
+    <rect x="1560" y="760" width="62" height="6" rx="3" fill="#b82a22"/>
+    <path d="M1576 840 l15 -14 l15 14 l-15 14 Z" fill="#b82a22"/>
+    <ellipse cx="1500" cy="1014" rx="150" ry="44" fill="url(#gleather)"/>
+    <path d="M1380 1000 q60 -26 150 -24" stroke="#3a3a3a" stroke-width="3" fill="none"/>
+    <ellipse cx="1500" cy="1008" rx="130" ry="30" fill="none" stroke="#242424" stroke-width="3"/>
+    <rect x="1350" y="950" width="18" height="60" fill="#141414"/>
+    <rect x="1340" y="944" width="50" height="14" rx="7" fill="#1c1c1c"/>
+    <rect x="1492" y="1050" width="16" height="100" fill="#121212"/>
+    <rect x="1494" y="1050" width="4" height="100" fill="#2a2a2a"/>
+    <path d="M1500 1150 l-120 36 M1500 1150 l-30 54 M1500 1150 l100 44 M1500 1150 l130 -8" stroke="#161616" stroke-width="14" stroke-linecap="round"/>
+    <g fill="#c9302a"><circle cx="1380" cy="1186" r="11"/><circle cx="1470" cy="1204" r="11"/><circle cx="1600" cy="1194" r="11"/><circle cx="1630" cy="1142" r="11"/></g>
+  </g>
+
+  <!-- TV on the side wall -->
+  <polygon points="1712,500 1800,470 1800,880 1712,866" fill="#0a0a0b"/>
+  <polygon points="1730,520 1760,510 1720,700 1716,640" fill="#fff" opacity=".04"/>
+  <line x1="1756" y1="872" x2="1756" y2="1060" stroke="#141414" stroke-width="3"/>
+
+  <!-- certificate: Helping Hands' signed record -->
+  <g class="hot" data-key="mock" tabindex="0" role="button" aria-label="Mock Trial">
+    <rect class="glow" x="966" y="470" width="112" height="92" rx="6" fill="none" stroke="#f3c77a" stroke-width="4"/>
+    <rect x="978" y="484" width="92" height="72" fill="#000" opacity=".3"/>
+    <rect x="976" y="480" width="92" height="72" fill="#2a1b14"/>
+    <rect x="984" y="488" width="76" height="56" fill="#e4dfd0"/>
+    <rect x="988" y="492" width="68" height="48" fill="none" stroke="#b8a878" stroke-width="1.5"/>
+    <g stroke="#9a9384" stroke-width="2"><line x1="994" y1="502" x2="1050" y2="502"/><line x1="998" y1="512" x2="1046" y2="512"/><line x1="994" y1="522" x2="1030" y2="522"/></g>
+    <path d="M996 534 q8 -6 16 0 q6 4 12 -2" stroke="#3b4a78" stroke-width="1.5" fill="none"/>
+    <circle cx="1046" cy="532" r="8" fill="#b8431f"/>
+    <circle cx="1046" cy="532" r="4" fill="none" stroke="#e8a080" stroke-width="1.5"/>
+    <circle class="pip-ring" cx="1068" cy="480" r="9"/><circle class="pip" cx="1068" cy="480" r="9"/>
+  </g>
+
+  <!-- lanyard on the door handle: CVL -->
+  <g class="hot" data-key="cvl" tabindex="0" role="button" aria-label="Circular Venture Lab internship">
+    <rect class="glow" x="808" y="690" width="60" height="120" rx="6" fill="none" stroke="#f3c77a" stroke-width="4"/>
+    <rect x="836" y="700" width="18" height="12" rx="4" fill="#9aa0a4"/>
+    <circle cx="845" cy="706" r="7" fill="#b8bec2"/>
+    <g class="swing" style="transform-origin:845px 708px">
+    <path d="M845 708 L826 764 M845 708 L852 764" stroke="#2c5aa8" stroke-width="4" fill="none"/>
+    <rect x="818" y="762" width="40" height="40" rx="4" fill="#f4ecd9"/>
+    <rect x="818" y="762" width="40" height="9" rx="4" fill="#2c5aa8"/>
+    <text x="838" y="791" font-family="IBM Plex Mono" font-size="12" fill="#1d1a14" text-anchor="middle">CVL</text>
+    </g>
+    <circle class="pip-ring" cx="866" cy="700" r="9"/><circle class="pip" cx="866" cy="700" r="9"/>
+  </g>
+
+  <!-- jar in the hutch: Send Energy -->
+  <g class="hot" data-key="send" tabindex="0" role="button" aria-label="Send Energy">
+    <rect class="glow" x="300" y="642" width="80" height="80" rx="6" fill="none" stroke="#f3c77a" stroke-width="4"/>
+    <rect x="316" y="664" width="48" height="54" rx="7" fill="#f2efe8"/>
+    <rect x="320" y="668" width="6" height="44" rx="3" fill="#fff" opacity=".8"/>
+    <rect x="312" y="654" width="56" height="14" rx="3" fill="#ff4f00"/>
+    <g stroke="#c93c00" stroke-width="1.5"><line x1="318" y1="656" x2="318" y2="666"/><line x1="326" y1="656" x2="326" y2="666"/><line x1="334" y1="656" x2="334" y2="666"/><line x1="342" y1="656" x2="342" y2="666"/><line x1="350" y1="656" x2="350" y2="666"/><line x1="358" y1="656" x2="358" y2="666"/></g>
+    <rect x="322" y="680" width="36" height="20" fill="#111"/>
+    <text x="340" y="694" font-family="IBM Plex Mono" font-size="10" fill="#fff" text-anchor="middle">SEND</text>
+    <g fill="#ff4f00"><circle cx="330" cy="708" r="3"/><circle cx="340" cy="710" r="3"/><circle cx="350" cy="707" r="3"/></g>
+    <circle class="pip-ring" cx="376" cy="652" r="9"/><circle class="pip" cx="376" cy="652" r="9"/>
+  </g>
+
+  <!-- pager on the desk: PageMD -->
+  <g class="hot" data-key="pagemd" tabindex="0" role="button" aria-label="PageMD">
+    <rect class="glow" x="396" y="782" width="104" height="66" rx="8" fill="none" stroke="#f3c77a" stroke-width="4"/>
+    <ellipse cx="448" cy="842" rx="46" ry="5" fill="#000" opacity=".35"/>
+    <rect x="406" y="792" width="84" height="46" rx="8" fill="#232323" stroke="#6a6a66" stroke-width="2"/>
+    <rect x="414" y="800" width="50" height="20" rx="2" fill="#8fd18a" filter="url(#bloom)"/>
+    <rect x="414" y="800" width="50" height="5" rx="2" fill="#b6e6b0"/>
+    <text x="439" y="816" font-family="IBM Plex Mono" font-size="11" fill="#1b3a1a" text-anchor="middle">PAGE</text>
+    <circle cx="476" cy="810" r="4" fill="#ff4f00" class="blink"/>
+    <circle cx="476" cy="810" r="8" fill="#ff4f00" opacity=".25" class="blink"/>
+    <g fill="#3a3a3a"><rect x="414" y="826" width="14" height="6" rx="2"/><rect x="432" y="826" width="14" height="6" rx="2"/><rect x="450" y="826" width="14" height="6" rx="2"/></g>
+    <circle class="pip-ring" cx="490" cy="792" r="9"/><circle class="pip" cx="490" cy="792" r="9"/>
+  </g>
+
+  <!-- finish: vignette + grain -->
+  <rect width="1800" height="1350" fill="url(#vignette)" pointer-events="none"/>
+  <rect width="1800" height="1350" filter="url(#grain)" opacity=".06" pointer-events="none"/>
+
+  <!-- the real room, revealed by the lamp -->
+  <image id="real" href="../room/room-real.webp" x="0" y="0" width="1800" height="1350" preserveAspectRatio="xMidYMid slice"/>
+</svg>
+<div class="caption">lights on · the real room</div>
+
+<div class="panel" id="panel" role="dialog" aria-live="polite" aria-label="Details">
+  <button type="button" aria-label="Close" id="close">×</button>
+  <div id="panel-body"></div>
+</div>
+</div>
+
+<section class="plain" aria-labelledby="plain-h">
+  <h2 id="plain-h">The plain version</h2>
+  <ol>
+    <li id="pagemd">
+      <h3>PageMD</h3>
+      <div class="role">Founder · the pager on the desk</div>
+      <p>An AI agent that triages inbound calls and pages on-call staff at outpatient clinics. My mom is a doctor and her pager kept interrupting dinner. Doctors can't be taken out of the loop, so we build for the nurses and staff on the other end.</p>
+      <p>I lead a 3-person team; we're in beta at 2 clinics in Vanderburgh County. 1st at regionals, 3rd of 1,174 at the STARTedUP Challenge final, $5,500 in funding · <a href="https://pagemd.ai">pagemd.ai</a></p>
+    </li>
+    <li id="hh">
+      <h3>Helping Hands</h3>
+      <div class="role">Developer · the trophy on the PC</div>
+      <p>Community service runs on paper and trust. Volunteers find shifts, organizations confirm hours in a two-step handshake, and every hour ends up on a signed record.</p>
+      <p>The team won the University of Evansville High School Changemaker Challenge (champion, full-tuition prize), then brought me on to build the website and platform. <a href="https://helping-hands-mu.vercel.app">helping-hands-mu.vercel.app</a></p>
+    </li>
+    <li id="send">
+      <h3>Send Energy</h3>
+      <div class="role">Operator · the jar in the hutch</div>
+      <p>Pre-workout gummies. I built the store and a custom checkout myself, and it has taken live payments since August 2026.</p>
+      <p><a href="https://lifefuel-web.vercel.app">lifefuel-web.vercel.app</a></p>
+    </li>
+    <li id="mentoring">
+      <h3>Alumni Mentoring</h3>
+      <div class="role">Founder · Signature School</div>
+      <p>My school had no alumni network, so I started one. I recruit mentors, match them with current students, and track check-ins. 22 pairs and about 100 mentoring hours so far.</p>
+    </li>
+    <li id="cvl">
+      <h3>Circular Venture Lab</h3>
+      <div class="role">Intern since June 2025 · the lanyard on the door</div>
+      <p>Wrote the CultivatID healthcare talent pipeline strategy: a 20-question intake form, 4 benchmarked state programs, and 8 retention strategies. To keep going through senior year, I got my school to bring back an internship course it hadn't offered since 2003.</p>
+    </li>
+    <li id="now">
+      <h3>Does a knowledge graph actually help?</h3>
+      <div class="role">Research, starting fall 2026 · the monitor</div>
+      <p>Every "company brain" assumes a knowledge graph makes AI answers better. I'm measuring it: hybrid retrieval vs GraphRAG on the Rust RFC corpus, with questions I write by hand. If the graph doesn't help, that's the finding.</p>
+    </li>
+    <li id="ee">
+      <h3>Does private equity make dental care worse?</h3>
+      <div class="role">Research · the books in the hutch</div>
+      <p>For my IB Extended Essay I coded 300 patient reviews across PE-owned and independent dental practices. Continuity of care dropped significantly at the acquired ones.</p>
+    </li>
+    <li id="mock">
+      <h3>Mock Trial</h3>
+      <div class="role">Captain · the certificate on the wall</div>
+      <p>Outstanding Witness from the Indiana State Bar Association. I run case strategy and witness prep, and took the team to state, where we placed top 20.</p>
+    </li>
+    <li id="yg">
+      <h3>Indiana Youth and Government</h3>
+      <div class="role">Governor's Cabinet · the ribbons on the wall</div>
+      <p>Wrote a bill that passed both chambers and was signed by the Youth Governor, which about 10 of 150 bills do. Appointed to the 4-person Governor's Cabinet from about 20 applicants.</p>
+    </li>
+    <li id="tutoring">
+      <h3>Tutoring</h3>
+      <div class="role">SAT &amp; AP Physics 1 · Elite Tutoring Place</div>
+      <p>I diagnose gaps from practice tests, write study plans, and retest weekly. 9 students, average gain of 186 SAT points.</p>
+    </li>
+  </ol>
+  <p class="outside">Outside of work: skateboarding, League of Legends, and ping-pong. I speak conversational Romanian and French.</p>
+</section>
+
+
+<footer>
+  <span>Sebastian “Seth” Donea · Signature School, class of 2027</span>
+  <span><a href="[TBD]">LinkedIn</a> · <a href="[TBD]">GitHub</a> · <a href="mailto:[TBD]">Email</a></span>
+</footer>
+
+<script>
+  const stage = document.getElementById('stage');
+  const panel = document.getElementById('panel');
+  const body = document.getElementById('panel-body');
+  const hots = document.querySelectorAll('.hot');
+  const lamp = document.getElementById('switch');
+  // the note pops out beside whatever was clicked, on whichever side has room
+  function place(el) {
+    const s = stage.getBoundingClientRect(), o = el.getBoundingClientRect();
+    const gap = 16, w = panel.offsetWidth, h = panel.offsetHeight;
+    const right = o.right - s.left + gap + w <= s.width;
+    const left = right ? o.right - s.left + gap : o.left - s.left - gap - w;
+    const cy = o.top + o.height / 2 - s.top;
+    const top = Math.max(8, Math.min(cy - 32, s.height - h - 8));
+    panel.dataset.side = right ? 'right' : 'left';
+    panel.style.left = Math.max(8, left) + 'px';
+    panel.style.top = top + 'px';
+    const ny = Math.max(14, Math.min(cy - top - 7, h - 28));
+    panel.style.setProperty('--ny', ny + 'px');
+    panel.style.setProperty('--ox', right ? '0' : '100%');
+    panel.style.setProperty('--oy', ny + 7 + 'px');
+  }
+  function open(key, el) {
+    body.innerHTML = document.getElementById(key).innerHTML;
+    hots.forEach(h => h.classList.toggle('on', h.dataset.key === key));
+    panel.classList.remove('open');
+    place(el);
+    void panel.offsetWidth;
+    panel.classList.add('open');
+  }
+  function close() { panel.classList.remove('open'); hots.forEach(h => h.classList.remove('on')); }
+  function toggleLights() {
+    const lit = stage.classList.toggle('lit');
+    lamp.setAttribute('aria-pressed', lit);
+    lamp.setAttribute('aria-label', lit ? 'Turn off the lights' : 'Turn on the lights');
+  }
+  const press = fn => e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } };
+  hots.forEach(h => {
+    h.addEventListener('click', () => open(h.dataset.key, h));
+    h.addEventListener('keydown', press(() => open(h.dataset.key, h)));
+  });
+  document.addEventListener('click', e => { if (!panel.contains(e.target) && !e.target.closest('.hot')) close(); });
+  lamp.addEventListener('click', toggleLights);
+  lamp.addEventListener('keydown', press(toggleLights));
+  document.getElementById('close').addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  // clock shows real Evansville time
+  function tick() {
+    const [h, m] = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour12: false, hour: '2-digit', minute: '2-digit' }).split(':').map(Number);
+    document.getElementById('clock-m').setAttribute('transform', `rotate(${m * 6} 1200 425)`);
+    document.getElementById('clock-h').setAttribute('transform', `rotate(${(h % 12) * 30 + m / 2} 1200 425)`);
+  }
+  tick(); setInterval(tick, 30000);
+
+  // a query dot hops across the graph on the monitor
+  const nodes = [...document.querySelectorAll('.graph-nodes circle')].map(c => ({ el: c, x: +c.getAttribute('cx'), y: +c.getAttribute('cy') }));
+  const edges = { 0: [1, 2], 1: [0, 3], 2: [0, 3], 3: [1, 2, 4], 4: [3] };
+  const walker = document.getElementById('walker');
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let at = 3, prev = -1;
+    const hop = () => {
+      const options = edges[at].filter(n => n !== prev);
+      const next = (options.length ? options : edges[at])[Math.floor(Math.random() * (options.length || edges[at].length))];
+      const a = nodes[at], b = nodes[next], t0 = performance.now(), dur = 900;
+      const step = now => {
+        const t = Math.min(1, (now - t0) / dur), e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+        walker.setAttribute('cx', a.x + (b.x - a.x) * e);
+        walker.setAttribute('cy', a.y + (b.y - a.y) * e);
+        if (t < 1) return requestAnimationFrame(step);
+        b.el.setAttribute('stroke', '#f3c77a');
+        setTimeout(() => b.el.removeAttribute('stroke'), 450);
+        prev = at; at = next;
+        setTimeout(hop, 700);
+      };
+      requestAnimationFrame(step);
+    };
+    setTimeout(hop, 800);
+  }
+</script>
+</body>
+</html>
