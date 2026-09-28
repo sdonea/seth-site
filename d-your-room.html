@@ -25,6 +25,7 @@
   header p { margin: 8px 0 0; color: var(--muted); font-size: 14px; max-width: 38em; }
   .hint { font-size: 13px; color: var(--muted); }
   .hint b { color: var(--lamp); font-weight: 500; }
+  body:not(:has(.gl)) .turn { display: none; }
 
   .stage { max-width: 1200px; margin: 0 auto; padding: 16px 24px 0; position: relative; }
   svg { width: 100%; height: auto; display: block; border-radius: 6px; }
@@ -115,7 +116,7 @@
     <h1>Sebastian “Seth” Donea</h1>
     <p>This is my actual room in Evansville, Indiana. Most of what I'm working on is somewhere in it.</p>
   </div>
-  <div class="hint"><b>●</b> click anything that glows, or scroll for the plain version</div>
+  <div class="hint"><b>●</b> click anything that glows<span class="turn">, drag to turn the room</span>, or scroll for the plain version</div>
 </header>
 
 <div class="stage" id="stage">
@@ -738,19 +739,19 @@
   <ol>
     <li id="pagemd">
       <h3>PageMD</h3>
-      <div class="role">Founder · the pager on the desk</div>
+      <div class="role">Founder · the pager on the nightstand</div>
       <p>An AI agent that triages inbound calls and pages on-call staff at outpatient clinics. My mom is a doctor and her pager kept interrupting dinner. Doctors can't be taken out of the loop, so we build for the nurses and staff on the other end.</p>
       <p>I lead a 3-person team; we're in beta at 2 clinics in Vanderburgh County. 1st at regionals, 3rd of 1,174 at the STARTedUP Challenge final, $5,500 in funding · <a href="https://pagemd.ai">pagemd.ai</a></p>
     </li>
     <li id="hh">
       <h3>Helping Hands</h3>
-      <div class="role">Developer · the trophy on the PC</div>
+      <div class="role">Developer · the trophy on the TV stand</div>
       <p>Community service runs on paper and trust. Volunteers find shifts, organizations confirm hours in a two-step handshake, and every hour ends up on a signed record.</p>
       <p>The team won the University of Evansville High School Changemaker Challenge (champion, full-tuition prize), then brought me on to build the website and platform. <a href="https://helping-hands-mu.vercel.app">helping-hands-mu.vercel.app</a></p>
     </li>
     <li id="send">
       <h3>Send Energy</h3>
-      <div class="role">Operator · the jar in the hutch</div>
+      <div class="role">Operator · the jar by the lava lamp</div>
       <p>Pre-workout gummies. I built the store and a custom checkout myself, and it has taken live payments since August 2026.</p>
       <p><a href="https://lifefuel-web.vercel.app">lifefuel-web.vercel.app</a></p>
     </li>
@@ -771,12 +772,12 @@
     </li>
     <li id="ee">
       <h3>Does private equity make dental care worse?</h3>
-      <div class="role">Research · the books in the hutch</div>
+      <div class="role">Research · the books at the foot of the bed</div>
       <p>For my IB Extended Essay I coded 300 patient reviews across PE-owned and independent dental practices. Continuity of care dropped significantly at the acquired ones.</p>
     </li>
     <li id="mock">
       <h3>Mock Trial</h3>
-      <div class="role">Captain · the certificate on the wall</div>
+      <div class="role">Captain · the certificate by the TV</div>
       <p>Outstanding Witness from the Indiana State Bar Association. I run case strategy and witness prep, and took the team to state, where we placed top 20.</p>
     </li>
     <li id="yg">
@@ -893,25 +894,27 @@
 
   // ---------- the 3D room ----------
   async function glRoom() {
-    const [THREE, { RoundedBoxGeometry }, { EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }, { RoomEnvironment }, { GTAOPass }, { ShaderPass }, { mergeGeometries }] = await Promise.all([
+    const [THREE, { RoundedBoxGeometry }, { EffectComposer }, { TexturePass }, { UnrealBloomPass }, { OutputPass }, { RoomEnvironment }, { GTAOPass }, { mergeGeometries }] = await Promise.all([
       import('three'),
       import('three/addons/geometries/RoundedBoxGeometry.js'),
       import('three/addons/postprocessing/EffectComposer.js'),
-      import('three/addons/postprocessing/RenderPass.js'),
+      import('three/addons/postprocessing/TexturePass.js'),
       import('three/addons/postprocessing/UnrealBloomPass.js'),
       import('three/addons/postprocessing/OutputPass.js'),
       import('three/addons/environments/RoomEnvironment.js'),
       import('three/addons/postprocessing/GTAOPass.js'),
-      import('three/addons/postprocessing/ShaderPass.js'),
       import('three/addons/utils/BufferGeometryUtils.js'),
     ]);
     await Promise.all(["500 40px 'IBM Plex Mono'", "40px 'Young Serif'"].map(f => document.fonts.load(f)));
 
     const renderer = new THREE.WebGLRenderer({ powerPreference: 'high-performance' });
-    const pr = Math.min(devicePixelRatio, 2);
+    let pr = Math.min(devicePixelRatio, 2);
     renderer.setPixelRatio(pr);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
+    // the room is still, so the two shadow maps are drawn once and redrawn only when something lifts on hover
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
     renderer.toneMapping = THREE.NeutralToneMapping;
     const canvas = renderer.domElement;
     canvas.setAttribute('role', 'img');
@@ -944,47 +947,61 @@
       return t;
     }
     const hsl = (h, s, l, a = 1) => `hsla(${h},${s}%,${l}%,${a})`;
-    function streaks(g, w, h, n, hue, sat, l0, spread, vertical) {
-      for (let i = 0; i < n; i++) {
-        g.strokeStyle = hsl(hue, sat, l0 + (rnd() - .5) * spread, .35 + rnd() * .35);
-        g.lineWidth = .6 + rnd() * 2.2;
-        const p = rnd() * (vertical ? w : h), amp = 2 + rnd() * 6, f = 1 + rnd() * 3, ph = rnd() * 6;
-        g.beginPath();
-        for (let s = 0; s <= 40; s++) {
-          const q = s / 40 * (vertical ? h : w), d = p + Math.sin(q / (vertical ? h : w) * Math.PI * 2 * f + ph) * amp;
-          vertical ? g.lineTo(d, q) : g.lineTo(q, d);
-        }
-        g.stroke();
-      }
+    // tileable value noise on a lattice that wraps at px by py, so pixel-built textures repeat without seams
+    function vnoise(px, py = px) {
+      const P = Float32Array.from({ length: px * py }, rnd);
+      const at = (i, j) => P[(j % py + py) % py * px + (i % px + px) % px];
+      return (x, y) => {
+        const xi = Math.floor(x), yi = Math.floor(y), u = x - xi, v = y - yi, su = u * u * (3 - 2 * u), sv = v * v * (3 - 2 * v);
+        return (at(xi, yi) * (1 - su) + at(xi + 1, yi) * su) * (1 - sv) + (at(xi, yi + 1) * (1 - su) + at(xi + 1, yi + 1) * su) * sv;
+      };
     }
-    const floorTex = tex(1024, 1024, (g, w, h) => {
-      const cols = 8, cw = w / cols;
-      for (let c = 0; c < cols; c++) {
-        let y = rnd() * h;
-        const end = y + h;
-        while (y < end) {
-          const len = 260 + rnd() * 460, l = 36 + rnd() * 9;
-          for (const yy of [y, y - h]) {
-            g.fillStyle = hsl(27 + rnd() * 6, 44, l);
-            g.fillRect(c * cw, yy, cw, len);
-            g.fillStyle = 'rgba(40,22,10,.75)';
-            g.fillRect(c * cw, yy, cw, 3);
-          }
-          y += len;
+    // fill a canvas pixel by pixel: f(u, v) returns a grey level, or [r, g, b], in 0..1
+    function pix(w, h, f, repeat) {
+      return tex(w, h, g => {
+        const img = g.createImageData(w, h), d = img.data;
+        for (let y = 0, i = 0; y < h; y++) for (let x = 0; x < w; x++, i += 4) {
+          const c = f(x / w, y / h, x, y);
+          const [r, gg, b] = typeof c === 'number' ? [c, c, c] : c;
+          d[i] = r * 255; d[i + 1] = gg * 255; d[i + 2] = b * 255; d[i + 3] = 255;
         }
-        g.fillStyle = 'rgba(40,22,10,.8)';
-        g.fillRect(c * cw, 0, 3, h);
-      }
-      streaks(g, w, h, 220, 24, 40, 30, 14, true);
+        g.putImageData(img, 0, 0);
+      }, repeat);
+    }
+    const smooth = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+    // wood: growth rings pulled along the grain by a slow warp, latewood lines, fibres and pores. Neutral, so one
+    // texture serves every stain through the material colour; the grain runs along v.
+    const wn1 = vnoise(6, 2), wn2 = vnoise(48, 6), wn3 = vnoise(320, 24);
+    function woodAt(u, v, off = 0, bend = 1) {
+      const warp = (wn1(u * 6 + off, v * 2) * .9 + wn2(u * 48, v * 6 + off) * .06) * bend;
+      const f = ((u * 12 + warp + off) % 1 + 1) % 1, late = smooth(.62, .9, f) * (1 - smooth(.93, 1, f));
+      const fibre = wn3(u * 320, v * 24 + off * 7), pore = fibre > .82 ? (fibre - .82) * 1.2 : 0;
+      return .88 + wn1(u * 6, v * 2 + 3) * .07 - late * .15 - fibre * .07 - pore;
+    }
+    const grainTex = pix(512, 1024, (u, v) => { const l = woodAt(u, v); return [l, l * .97, l * .93]; }, [1, 1]);
+    const floorTex = pix(1024, 1024, (u, v, x, y) => {
+      // eight rows of planks, staggered; each plank takes its own slice of grain, its own shade, and a dark seam
+      const cols = 8, c = Math.floor(u * cols);
+      const stagger = ((c * 0.37) % 1), vv = (v + stagger) % 1, id = c * 7;
+      const h = Math.sin(id * 91.7) * .5 + .5, tone = .86 + h * .14, hue = Math.sin(id * 13.1) * .03;
+      const l = woodAt(((u * cols) % 1) * .3 + h * .6, vv * 2, id * .13, .12) * tone;
+      const seam = Math.min((u * cols) % 1, 1 - (u * cols) % 1) * 1024 / cols < 1.4 || Math.min(vv, 1 - vv) * 1024 < 1.2;
+      const e = seam ? .45 : 1;
+      return [Math.min(1, l * (.93 + hue)) * e, l * .66 * e, l * .40 * e];
     }, [4, 3]);
-    const grainTex = tex(512, 512, (g, w, h) => {
-      g.fillStyle = hsl(16, 42, 21); g.fillRect(0, 0, w, h);
-      streaks(g, w, h, 90, 16, 42, 18, 12, false);
-    });
-    const wallTex = tex(256, 256, (g, w, h) => {
-      g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(0,0,0,${rnd() * .05})`; g.fillRect(rnd() * w, rnd() * h, 2, 2); }
-    }, [6, 3]);
+    // painted drywall: slow mottling in the value and a fine orange-peel texture, all within a few percent of white
+    const pn1 = vnoise(5), pn2 = vnoise(160);
+    const wallTex = pix(512, 512, (u, v) => .955 + pn1(u * 5, v * 5) * .035 + pn2(u * 160, v * 160) * .012 - (pn2(u * 160 + 40, v * 160) > .86 ? .02 : 0), [1, 1]);
+    // plain weave: threads alternating over and under, with a little slub so it's not a perfect grid
+    const fn1 = vnoise(32);
+    const weaveTex = pix(256, 256, (u, v) => {
+      const x = u * 64, y = v * 64, over = (Math.floor(x) + Math.floor(y)) % 2, t = over ? x % 1 : y % 1;
+      return .84 + Math.sin(t * Math.PI) * .14 + fn1(u * 32, v * 32) * .04 - .02;
+    }, [1, 1]);
+    // pebbled leather: soft cells with creased valleys
+    const ln1 = vnoise(48), ln2 = vnoise(96);
+    const leatherTex = pix(256, 256, (u, v) => { const n = Math.abs(ln1(u * 48, v * 48) - .5) * 2, m = Math.abs(ln2(u * 96, v * 96) - .5) * 2; return .55 + Math.min(n, m) * .45; }, [1, 1]);
+    grainTex.userData.tile = .8; wallTex.userData.tile = 1.6; weaveTex.userData.tile = .06; leatherTex.userData.tile = .08;
     const rugTex = tex(1024, 716, (g, w, h) => {
       g.fillStyle = '#34433e'; g.fillRect(0, 0, w, h);
       g.strokeStyle = '#415249'; g.lineWidth = 5;
@@ -1089,6 +1106,7 @@
       g.fillStyle = 'rgba(120,100,70,.28)';
       for (let y = 0; y < h; y += 3) g.fillRect(0, y, w, 1);
     }, [1, 3]);
+    pagesTex.userData.tile = .02;
     const matTex = tex(512, 176, (g, w, h) => {
       g.fillStyle = '#141414'; g.fillRect(0, 0, w, h);
       g.strokeStyle = '#a3281f'; g.lineWidth = 8; g.strokeRect(6, 6, w - 12, h - 12);
@@ -1100,15 +1118,84 @@
       g.fillStyle = r; g.fillRect(0, 0, 64, 64);
     });
 
+    // the view out: deep blue sky with stars, a crescent moon, and the roofline across the street with two lit windows
+    const nightTex = tex(256, 512, (g, w, h) => {
+      const r = g.createLinearGradient(0, 0, 0, h);
+      r.addColorStop(0, '#040810'); r.addColorStop(.6, '#0d1a30'); r.addColorStop(1, '#1d2a40');
+      g.fillStyle = r; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 70; i++) { g.fillStyle = `rgba(220,230,255,${.2 + rnd() * .6})`; const s = rnd() < .1 ? 2 : 1; g.fillRect(rnd() * w, rnd() * h * .6, s, s); }
+      const m = g.createRadialGradient(178, 92, 0, 178, 92, 44);
+      m.addColorStop(0, 'rgba(200,215,255,.35)'); m.addColorStop(1, 'rgba(200,215,255,0)');
+      g.fillStyle = m; g.fillRect(120, 40, 120, 110);
+      g.fillStyle = '#e8ecf4'; g.beginPath(); g.arc(178, 92, 15, 0, 7); g.fill();
+      g.fillStyle = '#0a1426'; g.beginPath(); g.arc(186, 87, 14, 0, 7); g.fill();
+      g.fillStyle = '#05070b';
+      g.beginPath(); g.moveTo(0, 400); g.lineTo(60, 360); g.lineTo(120, 400); g.lineTo(150, 400); g.lineTo(150, 380); g.lineTo(256, 380); g.lineTo(256, h); g.lineTo(0, h); g.fill();
+      for (const [x, y] of [[30, 430], [190, 420]]) { g.fillStyle = 'rgba(243,199,122,.8)'; g.fillRect(x, y, 16, 20); g.fillStyle = 'rgba(243,199,122,.15)'; g.fillRect(x - 6, y - 6, 28, 32); }
+    });
+    // duvet cover: white cotton with a faint weave and slow value drift, navy piping inset along the sides and the foot
+    const dn = vnoise(6), dw = vnoise(128);
+    const duvetTex = pix(512, 512, (u, v, x, y) => {
+      const inset = Math.min(Math.abs(x - 84), Math.abs(x - 428), Math.abs(y - 440));
+      if (inset < 2.2 && y < 441 && x > 83 && x < 429) return [.2, .27, .63];
+      const l = .95 + dn(u * 6, v * 6) * .04 + dw(u * 128, v * 128) * .02 - .02;
+      return [l, l * .99, l * .965];
+    });
+    const calTex = tex(256, 360, (g, w, h) => {
+      const r = g.createLinearGradient(0, 0, 0, h);
+      r.addColorStop(0, '#2d5fb8'); r.addColorStop(1, '#8fb6e8');
+      g.fillStyle = r; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#fff'; g.font = "bold 30px Helvetica, Arial, sans-serif"; g.textAlign = 'center'; g.fillText('CALENDAR 2024', w / 2, 52);
+      g.fillStyle = '#f4f2ee'; g.beginPath(); g.ellipse(128, 236, 84, 96, 0, 0, 7); g.fill();
+      g.fillStyle = '#7d8088';
+      for (const s of [-1, 1]) { g.beginPath(); g.moveTo(128 + s * 30, 160); g.lineTo(128 + s * 78, 96); g.lineTo(128 + s * 84, 190); g.fill(); }
+      g.beginPath(); g.moveTo(128, 214); g.bezierCurveTo(90, 190, 60, 180, 50, 230); g.lineTo(206, 230); g.bezierCurveTo(196, 180, 166, 190, 128, 214); g.fill();
+      g.fillStyle = '#6fa8d8'; for (const s of [-1, 1]) { g.beginPath(); g.arc(128 + s * 34, 232, 9, 0, 7); g.fill(); }
+      g.fillStyle = '#1b1b1b'; g.beginPath(); g.ellipse(128, 276, 14, 10, 0, 0, 7); g.fill();
+    });
+    const legoTex = tex(256, 256, (g, w, h) => {
+      g.fillStyle = '#f2f0ea'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#d42a1e'; g.fillRect(12, 12, 52, 52);
+      g.fillStyle = '#fff'; g.font = "bold 16px Helvetica, Arial, sans-serif"; g.fillText('LEGO', 16, 44);
+      g.fillStyle = '#111'; g.fillRect(72, 12, w - 84, 52);
+      g.fillStyle = '#f2c230'; g.font = "bold 30px Helvetica, Arial, sans-serif"; g.fillText('STAR WARS', 80, 50);
+      g.fillStyle = '#c8b89a'; g.fillRect(0, 150, w, h - 150);
+      g.fillStyle = '#8c929a'; g.beginPath(); g.moveTo(40, 150); g.lineTo(200, 110); g.lineTo(220, 150); g.lineTo(90, 190); g.fill();
+      g.fillStyle = '#d42a1e'; g.beginPath(); g.arc(34, 220, 20, 0, 7); g.fill();
+    });
+    const stickerTex = tex(256, 80, (g, w, h) => {
+      g.fillStyle = '#f7f7f5'; g.beginPath(); g.roundRect(0, 0, w, h, 18); g.fill();
+      g.fillStyle = '#2f6ee0'; g.beginPath(); g.roundRect(14, 14, 52, 52, 12); g.fill();
+      g.fillStyle = '#fff'; g.fillRect(28, 38, 24, 6);
+      g.fillStyle = '#1b2230'; g.font = "600 40px Helvetica, Arial, sans-serif"; g.fillText('PageMD', 78, 54);
+    });
+    const echoTex = tex(160, 96, (g, w, h) => {
+      g.fillStyle = '#1f7fd6'; g.fillRect(0, 0, w, h);
+      g.strokeStyle = '#8fd0ff'; g.lineWidth = 3;
+      for (let i = 0; i < 9; i++) { g.beginPath(); g.moveTo(rnd() * w, rnd() * h); for (let k = 0; k < 4; k++) g.lineTo(rnd() * w, rnd() * h); g.stroke(); }
+    });
+    const tigerTex = tex(256, 128, (g, w, h) => {
+      g.fillStyle = '#f3efe4'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#1b1b1b';
+      for (let x = 10; x < w; x += 22 + rnd() * 10) { g.beginPath(); g.moveTo(x, 0); g.quadraticCurveTo(x + 14, h * .3, x + 2, h * .55); g.lineTo(x + 7, h * .5); g.quadraticCurveTo(x + 18, h * .25, x + 8, 0); g.fill(); }
+    });
+
     // the monitor: a knowledge graph with a query dot hopping node to node
     const scr = document.createElement('canvas');
     scr.width = 1024; scr.height = 348;
     const sg = scr.getContext('2d');
     const scrTex = new THREE.CanvasTexture(scr);
     scrTex.colorSpace = THREE.SRGBColorSpace;
+    // re-uploaded as it animates, so no mip chain to rebuild each time
+    scrTex.generateMipmaps = false;
+    scrTex.minFilter = THREE.LinearFilter;
     const NODES = [[1095, 758], [1155, 732], [1145, 798], [1215, 772], [1260, 732]].map(([x, y]) => [(x - 1050) * 1024 / 342 - 20, (y - 702) * 348 / 136]);
     const EDGES = { 0: [1, 2], 1: [0, 3], 2: [0, 3], 3: [1, 2, 4], 4: [3] };
+    let screenKey = '';
     function drawScreen(wx, wy, flash, caret) {
+      const key = [wx | 0, wy | 0, flash, caret].join();
+      if (key === screenKey) return;
+      screenKey = key;
       sg.fillStyle = '#070a0d'; sg.fillRect(0, 0, 1024, 348);
       sg.strokeStyle = '#0e161c'; sg.lineWidth = 2;
       for (let x = 0; x < 1024; x += 32) { sg.beginPath(); sg.moveTo(x, 0); sg.lineTo(x, 348); sg.stroke(); }
@@ -1134,40 +1221,65 @@
     drawScreen(...NODES[3], -1, true);
 
     // ----- materials + modelling helpers -----
-    const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: .8, ...o });
+    // edge wear: box bevels carry a 'wear' attribute (1 on the rounded edge), which lifts and polishes the colour there,
+    // the way paint and stain rub thin where hands and feet touch. One patch, shared by every material.
+    const wearPatch = sh => {
+      sh.vertexShader = 'attribute float wear;\nvarying float vWear;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvWear = wear;');
+      sh.fragmentShader = 'varying float vWear;\n' + sh.fragmentShader
+        .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * 1.45 + .02, vWear * .6);')
+        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor *= 1. - vWear * .3;');
+    };
+    // materials are shared by their parameters, so identical calls land in one merged draw
+    const cache = new Map(), argsOf = new WeakMap();
+    const shared = (Ctor, args) => {
+      const k = Ctor.name + JSON.stringify(Object.entries(args).map(([n, v]) => [n, v?.isTexture ? v.uuid : v]));
+      if (!cache.has(k)) {
+        const m = new Ctor(args);
+        argsOf.set(m, args);
+        m.onBeforeCompile = wearPatch;
+        m.customProgramCacheKey = () => 'wear';
+        cache.set(k, m);
+      }
+      return cache.get(k);
+    };
+    const std = (color, o = {}) => shared(THREE.MeshStandardMaterial, { color, roughness: .8, ...o });
     const shiny = (color, o = {}) => std(color, { roughness: .35, envMap: env, envMapIntensity: .5, ...o });
     const glow = (color, i, o = {}) => std('#000', { emissive: color, emissiveIntensity: i, ...o });
     const M = {
-      wall: std('#c4c5c1', { map: wallTex, roughness: .95 }),
+      wall: std('#c4c5c1', { map: wallTex, bumpMap: wallTex, bumpScale: .6, roughness: .92 }),
       cap: std('#34383c', { roughness: .9 }),
       trim: std('#d4cdbd', { roughness: .55 }),
-      floor: std('#fff', { map: floorTex, roughness: .5, envMap: env, envMapIntensity: .15 }),
+      floor: std('#fff', { map: floorTex, bumpMap: floorTex, bumpScale: .5, roughness: .46, envMap: env, envMapIntensity: .18 }),
       slab: std('#2a1c12', { roughness: .7 }),
       plinth: std('#1c1a18', { roughness: .6 }),
-      wood: std('#fff', { map: grainTex, roughness: .55 }),
-      woodTop: std('#fff', { map: grainTex, roughness: .4, envMap: env, envMapIntensity: .25 }),
-      woodDark: std('#24160f', { roughness: .7 }),
-      brass: shiny('#c9a86a', { metalness: .85, roughness: .3, envMapIntensity: .9 }),
-      gold: shiny('#e0b64e', { metalness: 1, roughness: .28, envMapIntensity: 1.2 }),
+      // one cherry stain in three finishes: the carcass, the tops and trims (satin, catching the lamp), and the shadowed parts
+      wood: std('#6b3524', { map: grainTex, bumpMap: grainTex, bumpScale: .5, roughness: .55 }),
+      woodTop: std('#7a3f2a', { map: grainTex, bumpMap: grainTex, bumpScale: .4, roughness: .36, envMap: env, envMapIntensity: .3 }),
+      woodDark: std('#3a2016', { map: grainTex, roughness: .65 }),
+      brass: shiny('#c9a86a', { metalness: .85, roughness: .32, envMapIntensity: .5 }),
+      // polished metals see the environment's bright ceiling panel when they face up, so their reflections are kept low
+      gold: shiny('#e0b64e', { metalness: 1, roughness: .4, envMapIntensity: .35 }),
       black: std('#141416', { roughness: .5 }),
       steel: shiny('#1d1e20', { metalness: .6, roughness: .4 }),
       chrome: shiny('#9a9ea2', { metalness: 1, roughness: .2, envMapIntensity: 1 }),
-      leather: shiny('#1d1815', { roughness: .42, envMapIntensity: .35 }),
-      leatherHi: shiny('#2b231e', { roughness: .45, envMapIntensity: .35 }),
-      gLeather: shiny('#151515', { roughness: .4, envMapIntensity: .35 }),
-      red: shiny('#b3241d', { roughness: .45, envMapIntensity: .35 }),
+      leather: shiny('#231a15', { bumpMap: leatherTex, bumpScale: .22, roughness: .5, envMapIntensity: .35 }),
+      leatherHi: shiny('#33261e', { bumpMap: leatherTex, bumpScale: .22, roughness: .46, envMapIntensity: .4 }),
+      gLeather: shiny('#171717', { bumpMap: leatherTex, bumpScale: .22, roughness: .44, envMapIntensity: .35 }),
+      red: shiny('#b3241d', { bumpMap: leatherTex, bumpScale: .22, roughness: .48, envMapIntensity: .35 }),
       terracotta: std('#b87549', { roughness: .85 }),
       soil: std('#2a1d14', { roughness: 1 }),
       leaf: std('#4f8a55', { roughness: .6, side: THREE.DoubleSide }),
       leafDark: std('#3a6c40', { roughness: .6, side: THREE.DoubleSide }),
-      fur: new THREE.MeshPhysicalMaterial({ color: '#f1ede6', roughness: 1, sheen: 1, sheenRoughness: .5, sheenColor: '#ffffff' }),
-      furDark: new THREE.MeshPhysicalMaterial({ color: '#2b2e33', roughness: 1, sheen: 1, sheenRoughness: .5, sheenColor: '#8a9098' }),
+      fur: shared(THREE.MeshPhysicalMaterial, { color: '#f1ede6', roughness: 1, sheen: 1, sheenRoughness: .5, sheenColor: '#ffffff' }),
+      furDark: shared(THREE.MeshPhysicalMaterial, { color: '#2b2e33', roughness: 1, sheen: 1, sheenRoughness: .5, sheenColor: '#8a9098' }),
       cream: std('#e4dfd0', { roughness: .7 }),
       paper: std('#fff', { map: pagesTex, roughness: .9 }),
       leafV: std('#fff', { vertexColors: true, roughness: .55, side: THREE.DoubleSide }),
       rgb: glow('#d0443a', 2.4),
     };
+    const plushM = (color, sheenColor = '#ffffff', map = null) => shared(THREE.MeshPhysicalMaterial, { color, map, roughness: 1, sheen: 1, sheenRoughness: .45, sheenColor });
     function part(geo, m, x = 0, y = 0, z = 0, parent = scene) {
+      if (!geo.attributes.wear) geo.setAttribute('wear', new THREE.BufferAttribute(new Float32Array(geo.attributes.position.count), 1));
       const o = new THREE.Mesh(geo, m);
       o.position.set(x, y, z);
       o.castShadow = o.receiveShadow = true;
@@ -1175,14 +1287,56 @@
       return o;
     }
     // every box gets a soft bevel of at least a fifth of its thinnest side: nothing reads as a raw primitive
+    // every box gets a soft bevel of at least a fifth of its thinnest side: nothing reads as a raw primitive.
+    // Its UVs are planar and in metres, with v along the box's longest side, so wood grain runs the length of each
+    // board at one scale everywhere; and its bevelled edges carry wear.
     function box(w, h, d, m, x, y, z, parent, r = .012) {
-      const lim = Math.min(w, h, d) * .49;
-      const o = part(new RoundedBoxGeometry(w, h, d, 3, Math.min(Math.max(r, lim * .45), lim)), m, x, y, z, parent);
-      if (Math.max(w, h, d) < .05) o.castShadow = false;
+      const lim = Math.min(w, h, d) * .49, big = Math.max(w, h, d), rad = Math.min(Math.max(r, lim * .45), lim);
+      const g = new RoundedBoxGeometry(w, h, d, big < .06 ? 1 : big < .3 ? 2 : 3, rad);
+      const pos = g.attributes.position, nor = g.attributes.normal, uv = g.attributes.uv, n = pos.count, half = [w / 2, h / 2, d / 2];
+      const t = m.map?.wrapS === THREE.RepeatWrapping ? m.map.userData.tile || 1 : m.bumpMap?.userData.tile;
+      const long = [w, h, d].indexOf(big), wear = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const p = [pos.getX(i), pos.getY(i), pos.getZ(i)], q = [nor.getX(i), nor.getY(i), nor.getZ(i)].map(Math.abs);
+        const e = p.map((c, k) => Math.max(0, Math.abs(c) - (half[k] - rad)) / rad).sort((a, b) => b - a);
+        wear[i] = Math.min(1, e[1] * 1.4);
+        if (!t) continue;
+        const ax = q.indexOf(Math.max(...q)), [a, b] = [0, 1, 2].filter(k => k !== ax), [ua, va] = b === long ? [a, b] : [b, a];
+        uv.setXY(i, (p[ua] + half[ua]) / t + x * .7, (p[va] + half[va]) / t + z * .3);
+      }
+      g.setAttribute('wear', new THREE.BufferAttribute(wear, 1));
+      const o = part(g, m, x, y, z, parent);
+      if (big < .05) o.castShadow = false;
       return o;
     }
-    const cyl = (rt, rb, h, m, x, y, z, parent, seg = 32) => part(new THREE.CylinderGeometry(rt, rb, h, seg), m, x, y, z, parent);
-    const ball = (r, m, x, y, z, parent, seg = 24) => part(new THREE.SphereGeometry(r, seg, Math.ceil(seg * .7)), m, x, y, z, parent);
+    // cylinders get the same soft bevel as boxes: a lathe with rounded rims, whose rims carry wear. A labelled cylinder
+    // (a map that doesn't tile) keeps plain UVs so its label isn't stretched over the caps.
+    function cyl(rt, rb, h, m, x, y, z, parent, seg = 32) {
+      if (m.map && m.map.wrapS !== THREE.RepeatWrapping) return part(new THREE.CylinderGeometry(rt, rb, h, seg), m, x, y, z, parent);
+      const b = Math.min(.012, Math.min(rt, rb, h / 2) * .35), pts = [[0, -h / 2]], rim = [];
+      const arc = (cx, cy, a0) => { for (let k = 0; k <= 3; k++) { const a = a0 + k / 3 * Math.PI / 2; pts.push([cx + Math.cos(a) * b, cy + Math.sin(a) * b]); rim.push(pts.length - 1); } };
+      arc(rb - b, -h / 2 + b, -Math.PI / 2);
+      arc(rt - b, h / 2 - b, 0);
+      pts.push([0, h / 2]);
+      const g = new THREE.LatheGeometry(pts.map(([a, c]) => new THREE.Vector2(Math.max(0, a), c)), seg), n = pts.length;
+      g.setAttribute('wear', new THREE.BufferAttribute(Float32Array.from({ length: g.attributes.position.count }, (_, i) => rim.includes(i % n) ? .8 : 0), 1));
+      return part(g, m, x, y, z, parent);
+    }
+    const ball = (r, m, x, y, z, parent, seg = r < .015 ? 10 : r < .05 ? 16 : 24) => part(new THREE.SphereGeometry(r, seg, Math.ceil(seg * .7)), m, x, y, z, parent);
+    // a stuffed form: a squarish slab whose thickness pinches to a seam at its edges, with soft creases across the top.
+    // Pillows, cushions, the fold of the duvet and the chair rolls are all this, so every soft thing shares one language.
+    function pillowGeo(w, h, d, { square = .3, pinch = .78, crease = .1, seed = 1 } = {}) {
+      const g = new THREE.SphereGeometry(1, 40, 28), p = g.attributes.position, uv = g.attributes.uv;
+      for (let i = 0; i < p.count; i++) {
+        const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+        const sx = Math.sign(x) * Math.abs(x) ** square, sz = Math.sign(z) * Math.abs(z) ** square, m = Math.max(Math.abs(sx), Math.abs(sz));
+        const t = 1 - pinch * m ** 3, dent = crease * t * (Math.sin(sx * 5.3 + seed) * Math.sin(sz * 4.1 - seed * 2) * .6 + Math.sin((sx + sz) * 7 + seed) * .4);
+        p.setXYZ(i, sx * w / 2, (Math.sign(y) * Math.abs(y) ** .75 * t + (y > 0 ? dent : dent * .3)) * h / 2, sz * d / 2);
+        uv.setXY(i, uv.getX(i) * (w + d) * 2 / .06, uv.getY(i) * Math.max(w, d) / .06);
+      }
+      g.computeVertexNormals();
+      return g;
+    }
     const lathe = (pts, m, x, y, z, parent, seg = 40) => part(new THREE.LatheGeometry(pts.map(([a, b]) => new THREE.Vector2(a, b)), seg), m, x, y, z, parent);
     const plane = (w, h, m, x, y, z, parent) => part(new THREE.PlaneGeometry(w, h), m, x, y, z, parent);
     function grp(x = 0, y = 0, z = 0, parent = scene, ry = 0) {
@@ -1201,6 +1355,7 @@
     const cable = (pts, r, m, parent = scene) => part(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, r, 8), m, 0, 0, 0, parent);
     const capsule = (r, len, m, x, y, z, parent) => part(new THREE.CapsuleGeometry(r, len, 8, 20), m, x, y, z, parent);
     function instances(geo, m, parent, list) {
+      if (!geo.attributes.wear) geo.setAttribute('wear', new THREE.BufferAttribute(new Float32Array(geo.attributes.position.count), 1));
       const im = new THREE.InstancedMesh(geo, m, list.length), o = new THREE.Object3D();
       list.forEach(([x, y, z, rx = 0, ry = 0, rz = 0], i) => { o.position.set(x, y, z); o.rotation.set(rx, ry, rz); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
       im.receiveShadow = true;
@@ -1252,19 +1407,27 @@
     }
 
     // ----- the room shell: a cutaway diorama on a plinth -----
-    const X0 = -3, X1 = 3, Z0 = -2.2, Z1 = 2.2, H = 2.7, T = .14;
+    const X0 = -3, X1 = 3, Z0 = -2.2, Z1 = 2.9, ZC = (Z0 + Z1) / 2, H = 2.7, T = .14;
     const DL = -.95, DR = .25, DH = 2.3, HALL = 1, ZD = Z0 - T - HALL;
     const DESK_Y = .765, GD_Y = .75;
-    box(X1 - X0 + 2 * T + .18, .12, Z1 - Z0 + T + .18, M.plinth, 0, -.24, (Z0 - T + Z1) / 2, scene, .04);
-    box(X1 - X0 + 2 * T, .18, Z1 - Z0 + T, M.slab, 0, -.09, (Z0 - T + Z1) / 2, scene, .01);
-    const floor = plane(X1 - X0, Z1 - Z0, M.floor, 0, .001, 0);
+    box(X1 - X0 + 2 * T + .18, .12, Z1 - Z0 + 2 * T + .18, M.plinth, 0, -.24, ZC, scene, .04);
+    box(X1 - X0 + 2 * T, .18, Z1 - Z0 + 2 * T, M.slab, 0, -.09, ZC, scene, .01);
+    const floor = plane(X1 - X0, Z1 - Z0, M.floor, 0, .001, ZC);
     floor.rotation.x = -Math.PI / 2;
-    function wall(w, h, d, x, y, z) {
-      noShadow(box(w, h, d, M.wall, x, y, z, scene, .008));
-      noShadow(box(w + .01, .03, d + .01, M.cap, x, y + h / 2 + .015, z, scene, .008));
+    function wall(w, h, d, x, y, z, parent = scene) {
+      noShadow(box(w, h, d, M.wall, x, y, z, parent, .008));
+      noShadow(box(w + .01, .03, d + .01, M.cap, x, y + h / 2 + .015, z, parent, .008));
     }
-    wall(T, H, Z1 - Z0 + T, X0 - T / 2, H / 2, (Z0 - T + Z1) / 2);
-    wall(T, H, Z1 - Z0 + T, X1 + T / 2, H / 2, (Z0 - T + Z1) / 2);
+    // the east, west and north walls each come in two versions: the full wall with everything hung on it, and a
+    // low cut stub. Whichever wall the camera is outside of drops to its stub, so the room stays a cutaway from any angle.
+    const STUB = .16, sides = [];
+    function side(outside) { const s = { full: grp(), stub: grp(), outside }; s.stub.visible = false; sides.push(s); return s; }
+    const east = side(p => p.x < X0), west = side(p => p.x > X1), north = side(p => p.z > Z1);
+    for (const [s, x] of [[east, X0 - T / 2], [west, X1 + T / 2]]) {
+      wall(T, H, Z1 - Z0 + 2 * T, x, H / 2, ZC, s.full);
+      wall(T, STUB, Z1 - Z0 + 2 * T, x, STUB / 2, ZC, s.stub);
+    }
+    wall(X1 - X0 + 2 * T, STUB, T, 0, STUB / 2, Z1 + T / 2, north.stub);
     wall(DL - X0 + T, H, T, (X0 - T + DL) / 2, H / 2, Z0 - T / 2);
     wall(X1 + T - DR, H, T, (DR + X1 + T) / 2, H / 2, Z0 - T / 2);
     // the hall behind the doorway, down to a closed door
@@ -1276,18 +1439,52 @@
     hallFloor.rotation.x = -Math.PI / 2;
     box(DR - DL + 2 * T, .18, HALL + T, M.slab, (DL + DR) / 2, -.09, Z0 - (HALL + T) / 2, scene, .01);
     // ceiling: one-sided, so it only exists when you look up from inside the room
-    const ceiling = plane(X1 - X0, Z1 - Z0, std('#cfcfca', { map: wallTex }), 0, H, 0);
+    const ceiling = plane(X1 - X0, Z1 - Z0, std('#cfcfca', { map: wallTex }), 0, H, ZC);
     ceiling.rotation.x = Math.PI / 2;
     ceiling.castShadow = false;
     // trim: baseboards, door casing
-    for (const [w, d, x, z] of [[.02, Z1 - Z0, X0 + .01, 0], [.02, Z1 - Z0, X1 - .01, 0], [DL - X0, .02, (X0 + DL) / 2, Z0 + .01], [X1 - DR, .02, (X1 + DR) / 2, Z0 + .01]]) box(w, .1, d, M.trim, x, .05, z, scene, .006);
+    for (const [w, d, x, z] of [[.02, Z1 - Z0, X0 + .01, ZC], [.02, Z1 - Z0, X1 - .01, ZC], [DL - X0, .02, (X0 + DL) / 2, Z0 + .01], [X1 - DR, .02, (X1 + DR) / 2, Z0 + .01], [X1 - X0, .02, 0, Z1 - .01]]) box(w, .1, d, M.trim, x, .05, z, scene, .006);
     box(.07, DH + .035, .025, M.trim, DL - .035, (DH + .035) / 2, Z0 + .012, scene, .006);
     box(.07, DH + .035, .025, M.trim, DR + .035, (DH + .035) / 2, Z0 + .012, scene, .006);
     box(DR - DL + .14, .07, .025, M.trim, (DL + DR) / 2, DH + .035, Z0 + .012, scene, .006);
     // crown molding, two steps
-    for (const s of [-1, 1]) { box(.05, .07, Z1 - Z0, M.trim, s * (X1 - .025), H - .035, 0); box(.028, .03, Z1 - Z0, M.trim, s * (X1 - .014), H - .085, 0); }
+    for (const [s, sd] of [[-1, east], [1, west]]) { box(.05, .07, Z1 - Z0, M.trim, s * (X1 - .025), H - .035, ZC, sd.full); box(.028, .03, Z1 - Z0, M.trim, s * (X1 - .014), H - .085, ZC, sd.full); }
     box(X1 - X0, .07, .05, M.trim, 0, H - .035, Z0 + .025);
     box(X1 - X0, .03, .028, M.trim, 0, H - .085, Z0 + .014);
+    box(X1 - X0, .07, .05, M.trim, 0, H - .035, Z1 - .025, north.full);
+    box(X1 - X0, .03, .028, M.trim, 0, H - .085, Z1 - .014, north.full);
+
+    // the window wall: the wall is four pieces around the opening, then the frame, a rolled shade and the curtains
+    const WX0 = -.45, WX1 = .85, WY0 = .9, WY1 = 2.15, WX = (WX0 + WX1) / 2, WW = WX1 - WX0;
+    {
+      const n = north.full, zc = Z1 + T / 2;
+      for (const [x0, x1, y0, y1] of [[X0 - T, WX0, 0, H], [WX1, X1 + T, 0, H], [WX0, WX1, 0, WY0], [WX0, WX1, WY1, H]]) noShadow(box(x1 - x0, y1 - y0, T, M.wall, (x0 + x1) / 2, (y0 + y1) / 2, zc, n, .004));
+      noShadow(box(X1 - X0 + 2 * T + .01, .03, T + .01, M.cap, 0, H + .015, zc, n, .008));
+      // night outside: a deep blue pane with a faint glow low down
+      plane(WW, WY1 - WY0, std('#000', { emissiveMap: nightTex, emissive: '#fff', emissiveIntensity: .9 }), WX, (WY0 + WY1) / 2, Z1 + T - .02, n).rotation.y = Math.PI;
+      const frameM = std('#e8e4da', { roughness: .5 });
+      for (const [w, h, x, y] of [[.06, WY1 - WY0, WX0 + .03, (WY0 + WY1) / 2], [.06, WY1 - WY0, WX1 - .03, (WY0 + WY1) / 2], [WW, .06, WX, WY1 - .03], [WW, .05, WX, WY0 + .025], [.04, WY1 - WY0, WX, (WY0 + WY1) / 2]]) box(w, h, T - .02, frameM, x, y, zc, n, .006);
+      box(WW + .12, .025, .08, frameM, WX, WY0 - .005, Z1 - .02, n, .008);
+      box(WW + .16, .07, .025, M.trim, WX, WY1 + .035, Z1 - .012, n, .006);
+      for (const x of [WX0 - .04, WX1 + .04]) box(.07, WY1 - WY0 + .06, .025, M.trim, x, (WY0 + WY1) / 2 - .01, Z1 - .012, n, .006);
+      box(WW - .08, .2, .03, std('#ece8df', { roughness: .9 }), WX, WY1 - .14, Z1 - .02, n, .012);
+      // curtain rod with finials and brackets
+      const rodM = shiny('#2a2624', { metalness: .6, roughness: .35 });
+      rod(V(WX0 - .62, 2.32, Z1 - .11), V(WX1 + .62, 2.32, Z1 - .11), .012, rodM, n);
+      for (const x of [WX0 - .64, WX1 + .64]) ball(.026, rodM, x, 2.32, Z1 - .11, n, 16);
+      for (const x of [WX0 - .45, WX1 + .45]) rod(V(x, 2.32, Z1), V(x, 2.32, Z1 - .12), .007, rodM, n, 8);
+      // two maroon panels, pleated, hanging from rings and pooling just above the floor; a gap shows the night
+      const curtM = shared(THREE.MeshPhysicalMaterial, { color: '#6a2026', map: weaveTex, bumpMap: weaveTex, bumpScale: .5, roughness: .85, sheen: .9, sheenColor: '#d0646a', side: THREE.DoubleSide });
+      for (const [x0, x1] of [[WX0 - .6, WX0 + .38], [WX1 - .3, WX1 + .6]]) {
+        const w = x1 - x0, g = new THREE.PlaneGeometry(w, 2.28, 72, 10), p = g.attributes.position;
+        for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i); p.setZ(i, Math.sin(x * 58) * .028 * (1 + (1.14 - y) * .08) + Math.sin(x * 11 + y) * .01); }
+        g.computeVertexNormals();
+        noShadow(part(g, curtM, (x0 + x1) / 2, 1.16 + .02, Z1 - .11, n));
+        const rings = [];
+        for (let x = x0 + .03; x < x1; x += .108) rings.push([x, 2.32, Z1 - .11]);
+        instances(new THREE.TorusGeometry(.018, .004, 6, 16), rodM, n, rings);
+      }
+    }
 
     // the door at the end of the hall
     const doorM = std('#7f858a', { roughness: .6 });
@@ -1302,9 +1499,6 @@
     const KNOB = V(DX + .33, .95, ZD + .075);
     cyl(.028, .028, .012, M.brass, DX + .33, .95, ZD + .046).rotation.x = Math.PI / 2;
     ball(.024, M.brass, KNOB.x, KNOB.y, KNOB.z);
-    const hallLight = new THREE.PointLight('#f3c77a', .5, 2.4, 2);
-    hallLight.position.set(DX, .3, ZD + .3);
-    scene.add(hallLight);
 
     // lanyard on the door handle: CVL
     const lanyard = grp(KNOB.x, KNOB.y - .012, KNOB.z + .01);
@@ -1318,21 +1512,21 @@
     // wall hardware: switch, outlets, vents, smoke detector
     box(.08, .125, .012, M.trim, DR + .2, 1.2, Z0 + .006, scene, .006);
     box(.02, .045, .02, M.cream, DR + .2, 1.21, Z0 + .014, scene, .005);
-    function outlet(x, y, z, ry) {
-      const o = grp(x, y, z, scene, ry);
+    function outlet(x, y, z, ry, parent = scene) {
+      const o = grp(x, y, z, parent, ry);
       box(.07, .115, .01, M.trim, 0, 0, .005, o, .005);
       for (const dy of [-.025, .025]) for (const dx of [-.008, .008]) box(.004, .014, .004, M.black, dx, dy, .011, o, .001);
     }
     outlet(1.95, .3, Z0, 0);
     outlet(-2.0, .3, Z0, 0);
-    outlet(X1, .3, .75, -Math.PI / 2);
-    function vent(x, y, z, ry) {
-      const o = grp(x, y, z, scene, ry);
+    outlet(X1, .3, -.75, -Math.PI / 2, west.full);
+    function vent(x, y, z, ry, parent = scene) {
+      const o = grp(x, y, z, parent, ry);
       box(.44, .17, .016, std('#b9b3a6', { roughness: .6 }), 0, 0, .008, o, .006);
       box(.39, .12, .01, M.black, 0, 0, .014, o, .003);
       for (let i = 0; i < 6; i++) box(.38, .012, .026, std('#aaa497', { roughness: .6 }), 0, -.05 + i * .02, .02, o, .003).rotation.x = -.6;
     }
-    vent(X0, 2.45, .35, Math.PI / 2);
+    vent(X0, 2.45, .35, Math.PI / 2, east.full);
     vent(2.35, 2.5, Z0, 0);
     const smoke = grp(.95, 2.56, Z0);
     cyl(.07, .075, .028, M.cream, 0, 0, .014, smoke, 40).rotation.x = Math.PI / 2;
@@ -1340,7 +1534,7 @@
     ball(.006, glow('#6fcf7a', 4), .035, -.03, .03, smoke, 10);
 
     // the clock: real America/Chicago time
-    const clock = grp(1.36, 2.18, Z0);
+    const clock = grp(.88, 1.72, Z0);
     part(new THREE.TorusGeometry(.165, .018, 12, 48), M.black, 0, 0, .02, clock);
     part(new THREE.CircleGeometry(.16, 48), std('#fff', { map: clockTex, roughness: .5 }), 0, 0, .012, clock);
     const hand = (len, w, m) => { const p = grp(0, 0, .022, clock); box(w, len, .004, m, 0, len / 2 - .012, 0, p, .002); return p; };
@@ -1354,7 +1548,7 @@
     }
 
     // ribbons: Indiana Youth and Government
-    const ribbons = grp(.7, 1.62, Z0);
+    const ribbons = grp(.52, 1.62, Z0);
     [['#2c5aa8', -.07], ['#e0782c', .07]].forEach(([c, x]) => {
       const s = new THREE.Shape();
       s.moveTo(-.03, 0); s.lineTo(.03, 0); s.lineTo(.03, -.26); s.lineTo(0, -.22); s.lineTo(-.03, -.26); s.closePath();
@@ -1367,14 +1561,14 @@
     });
 
     // certificate: Mock Trial
-    const cert = grp(1.05, 1.63, Z0);
+    const cert = grp(X1, 1.62, -1.15, west.full, -Math.PI / 2);
     box(.32, .26, .02, M.woodDark, 0, 0, .01, cert, .004);
     box(.28, .22, .006, std('#f2ecde'), 0, 0, .021, cert, .002);
     plane(.25, .195, std('#fff', { map: certTex, roughness: .8 }), 0, 0, .0245, cert);
 
     // posters: stylized takes on three album covers, taped up
     const tapeM = std('#e4dfd0', { roughness: .8, transparent: true, opacity: .75 });
-    [[posterMoon, 1.72, 1.74, .4, .52], [posterFlower, 2.17, 1.7, .36, .54], [posterBlond, 2.58, 1.72, .34, .5]].forEach(([t, x, y, w, h], i) => {
+    [[posterMoon, 1.25, 1.74, .4, .52], [posterFlower, 1.66, 1.7, .36, .54], [posterBlond, 2.02, 1.72, .34, .5]].forEach(([t, x, y, w, h], i) => {
       plane(w, h, std('#000', { transparent: true, opacity: .22, depthWrite: false }), x + .01, y - .012, Z0 + .0015).receiveShadow = false;
       plane(w, h, std('#fff', { map: t, roughness: .55 }), x, y, Z0 + .003);
       for (const [dx, dy, r] of [[-1, 1, -.35], [1, 1, .35]]) box(.05, .02, .002, tapeM, x + dx * (w / 2 - .01), y + dy * (h / 2 - .005), Z0 + .0045, scene, .001).rotation.z = r + i * .05;
@@ -1382,7 +1576,7 @@
 
     // ----- hutch desk against the left wall -----
     const HX = X0, HZ0 = Z0, HZ1 = -.55;
-    const innerM = std('#6a4630', { roughness: .7 });
+    const innerM = std('#6a4630', { map: grainTex, roughness: .7, emissive: '#5a3418', emissiveIntensity: .35 });
     box(.72, .045, HZ1 - HZ0, M.woodTop, HX + .36, DESK_Y - .0225, (HZ0 + HZ1) / 2, scene, .012);
     rod(V(HX + .72, DESK_Y - .024, HZ0 + .01), V(HX + .72, DESK_Y - .024, HZ1 - .01), .024, M.woodTop, scene, 16);
     box(.7, .014, HZ1 - HZ0 - .02, M.woodDark, HX + .35, DESK_Y - .052, (HZ0 + HZ1) / 2, scene, .004);
@@ -1411,9 +1605,6 @@
     box(HD - .01, .025, HZB - HZ0 - .03, M.wood, HX + HD / 2, 1.36, (HZ0 + HZB) / 2, scene, .006);
     rod(V(HX + HD - .005, 1.36, HZ0 + .03), V(HX + HD - .005, 1.36, HZB - .03), .014, M.woodTop, scene, 12);
     for (const y of [1.344, HT - .012]) noShadow(box(.012, .006, HZB - HZ0 - .08, glow('#ffd9a0', 3), HX + HD - .06, y, (HZ0 + HZB) / 2, scene, .002));
-    const hutchLight = new THREE.PointLight('#ffd9a0', .9, 1.5, 2);
-    hutchLight.position.set(HX + .22, 1.55, -1.45);
-    scene.add(hutchLight);
     // amber glass door, top left cubby
     {
       const x = HX + HD + .012, y0 = 1.3725, dh = HT - .025 - y0, dy = y0 + dh / 2, dz = (HZ0 + .03 - 1.7 + .015) / 2, dw = .455;
@@ -1430,9 +1621,13 @@
       for (const c of colors) {
         const t = .022 + rnd() * .02, h = maxH * (.72 + rnd() * .28), d = .16 + rnd() * .04;
         if (z + t > zEnd) break;
-        box(d, h, t, std(c, { roughness: .7 }), x, y + h / 2, z + t / 2, scene, .004);
-        box(.003, .014, t * .8, M.gold, x + d / 2, y + h * .8, z + t / 2, scene, .001);
-        box(.003, .01, t * .8, M.gold, x + d / 2, y + h * .2, z + t / 2, scene, .001);
+        // two boards and a rounded spine around a page block, so the top of each book shows its pages
+        const cover = std(c, { roughness: .6 });
+        for (const s of [-1, 1]) box(d - .004, h, .0035, cover, x - .002, y + h / 2, z + t / 2 + s * (t / 2 - .00175), scene, .0012);
+        cyl(t / 2, t / 2, h, cover, x + d / 2 - t * .3, y + h / 2, z + t / 2, scene, 12).scale.x = .6;
+        box(d - .012, h - .008, t - .005, M.paper, x - .006, y + h / 2 - .002, z + t / 2, scene, .001);
+        box(.003, .014, t * .8, M.gold, x + d / 2 - t * .3 + t * .31, y + h * .8, z + t / 2, scene, .001);
+        box(.003, .01, t * .8, M.gold, x + d / 2 - t * .3 + t * .31, y + h * .2, z + t / 2, scene, .001);
         z += t + .003;
       }
     }
@@ -1477,11 +1672,10 @@
 
     // plushies on top of the hutch: toy proportions, big heads, glossy button eyes, fuzzy fabric
     {
-      const plushM = (c, sheen = '#ffffff') => new THREE.MeshPhysicalMaterial({ color: c, roughness: 1, sheen: 1, sheenRoughness: .45, sheenColor: sheen });
       const gloss = std('#0c0c0e', { roughness: .12, envMap: env, envMapIntensity: .9 });
       const shine = std('#ffffff', { roughness: .3 });
       const pink = plushM('#e58a95');
-      const pb = (p, r, m, x, y, z, sx = 1, sy = 1, sz = 1) => { const o = ball(r, m, x, y, z, p, 32); o.scale.set(sx, sy, sz); return o; };
+      const pb = (p, r, m, x, y, z, sx = 1, sy = 1, sz = 1) => { const o = ball(r, m, x, y, z, p, r > .08 ? 32 : undefined); o.scale.set(sx, sy, sz); return o; };
       const eye = (p, x, y, z, r) => { pb(p, r, gloss, x, y, z, 1, 1.12, .7); pb(p, r * .3, shine, x - r * .3, y + r * .4, z + r * .6); };
       const ear = (p, x, y, z, s, r, h, outer, inner, tilt) => {
         const e = grp(x, y, z, p);
@@ -1606,7 +1800,7 @@
       box(.092, .044, .004, std('#3a3a3a'), -.012, .05, .0165, pg, .003);
       plane(.08, .033, std('#000', { emissive: '#fff', emissiveMap: pagerTex, emissiveIntensity: 1.1 }), -.012, .05, .0188, pg);
       for (let i = 0; i < 3; i++) box(.022, .01, .006, std('#3a3a3a'), -.038 + i * .026, .016, .016, pg, .003);
-      var ledM = glow('#ff4f00', 1);
+      var ledM = new THREE.MeshStandardMaterial({ color: '#000', emissive: '#ff4f00', emissiveIntensity: 1 });
       ball(.006, ledM, .048, .052, .016, pg, 12);
       box(.1, .06, .008, std('#1a1a1a'), 0, .04, -.02, pg, .003);
     }
@@ -1635,7 +1829,9 @@
     const lampPool = new THREE.SpotLight('#f6c983', 12, 0, 1.15, .95, 2);
     lampPool.position.set(-1.2, 1.36, -1.9);
     lampPool.target.position.set(-1.35, 0, -1.3);
-    for (const l of [lampPool, deskSpot]) {
+    // only the floor lamp casts shadow maps; the desk lamp's pool is small enough that AO grounds what sits in it
+    scene.add(deskSpot, deskSpot.target);
+    for (const l of [lampPool]) {
       l.castShadow = true;
       l.shadow.mapSize.set(1024, 1024);
       l.shadow.bias = -.0004;
@@ -1656,17 +1852,18 @@
       cyl(.024, .024, .2, M.chrome, 0, .33, 0, oc, 16);
       box(.32, .04, .3, M.black, 0, .42, 0, oc, .01);
       box(.58, .08, .56, M.leather, 0, .47, 0, oc);
-      box(.54, .09, .5, M.leatherHi, 0, .54, -.01, oc);
+      part(pillowGeo(.56, .13, .52, { square: .22, pinch: .55, crease: .06, seed: 4 }), M.leatherHi, 0, .545, -.01, oc);
       capsule(.048, .44, M.leatherHi, 0, .54, .235, oc).rotation.z = Math.PI / 2;
       const back = grp(0, .55, -.25, oc);
       back.rotation.x = -.14;
       box(.56, .86, .09, M.leather, 0, .44, 0, back, .04);
       const tuft = std('#120e0c', { roughness: .5 });
-      [.2, .42, .63].forEach(y => {
-        capsule(.08, .34, M.leatherHi, 0, y, .07, back).rotation.z = Math.PI / 2;
-        for (const x of [-.12, 0, .12]) ball(.009, tuft, x, y, .148, back, 10);
+      // three pillowed rolls, each pulled in at its buttons, and a head roll
+      [.2, .42, .63].forEach((y, i) => {
+        part(pillowGeo(.46, .17, .23, { square: .25, pinch: .6, crease: .08, seed: i * 2 }), M.leatherHi, 0, y, .075, back).rotation.x = Math.PI / 2;
+        for (const x of [-.12, 0, .12]) ball(.009, tuft, x, y, .158, back, 10);
       });
-      capsule(.065, .3, M.leatherHi, 0, .84, .06, back).rotation.z = Math.PI / 2;
+      part(pillowGeo(.4, .15, .17, { square: .3, pinch: .6, crease: .05, seed: 7 }), M.leatherHi, 0, .84, .065, back).rotation.x = Math.PI / 2;
       for (const x of [-.25, .25]) capsule(.042, .66, M.leather, x, .45, .055, back);
       const stitch = std('#6a5a4c', { roughness: .6 });
       for (let i = 0; i < 16; i++) box(.018, .004, .004, stitch, -.23 + i * .031, .44, -.047, back, .001);
@@ -1743,9 +1940,6 @@
     part(bend(new THREE.PlaneGeometry(.985, .335, 48, 1)), new THREE.MeshBasicMaterial({ map: scrTex }), 0, .4, .0155, monitor);
     box(.34, .022, .03, M.steel, 0, .597, .004, monitor, .008);
     noShadow(box(.3, .004, .008, glow('#ffe2b0', 2.2), 0, .586, .012, monitor, .002));
-    const screenLight = new THREE.PointLight('#b9d3da', .7, 3, 2);
-    screenLight.position.set(1.62, 1.1, -1.7);
-    scene.add(screenLight);
 
     // tower with pulsing RGB fans
     const pc = grp(2.32, GD_Y, -1.92);
@@ -1803,7 +1997,7 @@
       cyl(.025, .025, .2, M.chrome, 0, .33, 0, gc, 16);
       box(.34, .05, .3, M.black, 0, .42, 0, gc, .01);
       box(.5, .08, .5, M.gLeather, 0, .46, .02, gc);
-      box(.3, .05, .44, M.red, 0, .515, .03, gc, .02);
+      part(pillowGeo(.32, .08, .46, { square: .25, pinch: .5, crease: .05, seed: 5 }), M.red, 0, .515, .03, gc);
       for (const s of [-1, 1]) capsule(.055, .38, M.gLeather, s * .2, .52, .03, gc).rotation.x = Math.PI / 2;
       capsule(.04, .3, M.gLeather, 0, .5, .26, gc).rotation.z = Math.PI / 2;
       const back = grp(0, .5, -.24, gc);
@@ -1832,9 +2026,11 @@
     }
     box(1.3, .006, 1.1, shiny('#3a2a20', { roughness: .25, envMapIntensity: .3 }), 2.1, .004, -1.12, scene, .003);
 
-    // TV on the side wall
+    // TV on a pedestal mount, standing on the TV stand against the side wall
     {
-      const tv = grp(X1, 1.45, -.45, scene, -Math.PI / 2);
+      const tv = grp(X1 - .1, 1.45, .05, scene, -Math.PI / 2);
+      box(.3, .025, .12, M.steel, 0, -.83, -.1, tv, .008);
+      box(.07, .4, .04, M.steel, 0, -.6, -.06, tv, .01);
       box(1.3, .76, .045, std('#0a0a0b', { roughness: .4 }), 0, 0, .03, tv, .012);
       box(1.26, .72, .004, shiny('#050506', { roughness: .3, envMapIntensity: .12 }), 0, .01, .053, tv, .002);
       ball(.005, glow('#d0443a', 3), .6, -.37, .054, tv, 8);
@@ -1851,7 +2047,7 @@
     }
 
     // book stack on the floor: the Extended Essay
-    const books = grp(-2.35, 0, .15, scene, .3);
+    const books = grp(-.45, 0, 1.75, scene, .3);
     {
       let y = 0;
       [['#3f7a4a', .3, .045, .22], ['#c9c2b2', .28, .035, .2], ['#3b4a78', .31, .05, .23], ['#b8431f', .26, .03, .19], ['#d9c86a', .24, .04, .17]].forEach(([c, w, h, d], i) => {
@@ -1864,6 +2060,308 @@
       });
     }
 
+    // ----- the sleeping side, from the photos: bed on the east wall, dresser and TV stand on the west -----
+
+    const gloss = std('#0c0c0e', { roughness: .12, envMap: env, envMapIntensity: .9 });
+    const pb = (p, r, m, x, y, z, sx = 1, sy = 1, sz = 1) => { const o = ball(r, m, x, y, z, p, r > .08 ? 32 : undefined); o.scale.set(sx, sy, sz); return o; };
+    const eye = (p, x, y, z, r) => { pb(p, r, gloss, x, y, z, 1, 1.12, .7); pb(p, r * .3, std('#fff', { roughness: .3 }), x - r * .3, y + r * .4, z + r * .6); };
+    const fabric = (c, map = weaveTex) => shared(THREE.MeshPhysicalMaterial, { color: c, map, bumpMap: map === weaveTex ? weaveTex : null, bumpScale: .25, roughness: .92, sheen: .5, sheenColor: '#ffffff', side: THREE.DoubleSide });
+
+    // sleigh bed, headboard against the east wall; built facing +z, turned so the foot points into the room
+    const BZ = 1.16;
+    const bed = grp(X0, 0, BZ, scene, Math.PI / 2);
+    {
+      const bw = 1.72, bl = 2.2;
+      const arch = (w, y0, y1, rise) => { const s = new THREE.Shape(); s.moveTo(-w / 2, y0); s.lineTo(w / 2, y0); s.lineTo(w / 2, y1); s.quadraticCurveTo(0, y1 + rise, -w / 2, y1); s.closePath(); return s; };
+      const ext = (shape, d) => new THREE.ExtrudeGeometry(shape, { depth: d, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: 3, curveSegments: 24 });
+      part(ext(arch(bw - .08, .22, 1.2, .3), .06), M.wood, 0, 0, .03, bed);
+      const crest = []; for (let i = 0; i <= 16; i++) { const t = i / 16; crest.push(V((t - .5) * (bw - .08), 1.22 + 2 * t * (1 - t) * .3, .07)); }
+      cable(crest, .035, M.woodTop, bed);
+      part(ext(arch(bw - .08, .25, .5, .08), .05), M.wood, 0, 0, bl - .06, bed);
+      const foot = []; for (let i = 0; i <= 12; i++) { const t = i / 12; foot.push(V((t - .5) * (bw - .08), .5 + 2 * t * (1 - t) * .08 + .015, bl - .035)); }
+      cable(foot, .03, M.woodTop, bed);
+      for (const s of [-1, 1]) {
+        cyl(.05, .055, 1.28, M.wood, s * bw / 2, .64, .06, bed, 20);
+        ball(.055, M.woodTop, s * bw / 2, 1.3, .06, bed, 16);
+        cyl(.055, .06, .6, M.wood, s * bw / 2, .3, bl - .03, bed, 20);
+        ball(.065, M.woodTop, s * bw / 2, .62, bl - .03, bed, 16).scale.y = .8;
+        box(.05, .2, bl - .12, M.wood, s * (bw / 2 - .02), .3, bl / 2, bed, .015);
+      }
+      // PageMD sticker on the headboard, as in the photo
+      plane(.16, .05, std('#fff', { map: stickerTex, roughness: .4 }), .25, 1.08, .105, bed);
+      // box spring, then a mattress with a rolled edge and a welt seam
+      box(bw - .12, .1, bl - .2, std('#d9d3c6', { roughness: .9 }), 0, .34, bl / 2 + .02, bed, .02);
+      part(pillowGeo(bw - .1, .2, bl - .18, { square: .12, pinch: .25, crease: 0 }), fabric('#f1eee8'), 0, .46, bl / 2 + .02, bed);
+      // the duvet: turned down below the pillows, soft folds across the top, falling over the sides and the foot in a
+      // hem that ripples, with the corners hanging lowest
+      const top = .6, half = (bw - .12) / 2 + .01, z0 = .8, footZ = bl - .09, dw = bw + .32, dl = footZ + .2 - z0;
+      const dg = new THREE.PlaneGeometry(dw, dl, 96, 96);
+      dg.rotateX(-Math.PI / 2);
+      const p = dg.attributes.position, uv = dg.attributes.uv;
+      for (let i = 0; i < p.count; i++) {
+        let x = p.getX(i), z = p.getZ(i) + z0 + dl / 2;
+        let y = .022 * Math.sin(x * 4.2 + z * 1.3) + .014 * Math.sin(x * 9 - z * 5 + 1.7) + .007 * Math.sin(z * 13 + x * 3)
+          + .045 * Math.exp(-((x + .28) ** 2 * 7 + (z - 1.45) ** 2 * 1.2)) + .03 * Math.exp(-((x - .3) ** 2 * 9 + (z - 1.7) ** 2 * 2));
+        const ox = Math.max(0, Math.abs(x) - half), oz = Math.max(0, z - footZ);
+        // round over the mattress edge, then hang nearly straight with a rippled hem
+        y -= smooth(half - .08, half + .02, Math.abs(x)) * .03 + smooth(footZ - .08, footZ + .02, z) * .03;
+        if (ox) { y -= ox * 1.05 + ox * oz * 3; x = Math.sign(x) * (half + .02 + ox * .1 + Math.sin(z * 17) * .012 * ox / .22); }
+        if (oz) { y -= oz * 1.05; z = footZ + .02 + oz * .1 + Math.sin(x * 15) * .01 * oz / .2; }
+        p.setXYZ(i, x, y, z);
+      }
+      dg.computeVertexNormals();
+      const duvetM = fabric('#ffffff', duvetTex);
+      noShadow(part(dg, duvetM, 0, top, 0, bed));
+      // the fold: the top edge of the duvet turned back on itself, a soft roll across the bed
+      part(pillowGeo(bw + .02, .09, .3, { square: .2, pinch: .5, crease: .05, seed: 3 }), duvetM, 0, top + .03, z0 + .06, bed).rotation.x = .08;
+      // pillows: two leaning on the headboard, two lying in front, each a little rotated and dented differently
+      const pillowM = fabric('#f7f5f0');
+      for (const s of [-1, 1]) {
+        part(pillowGeo(.68, .2, .46, { square: .45, pinch: .85, seed: s + 2 }), pillowM, s * .4, .86, .27, bed).rotation.set(-1.1, s * .04, s * .03);
+        part(pillowGeo(.64, .17, .42, { square: .45, pinch: .85, seed: s * 3 }), pillowM, s * .37 + .03, .7, .57, bed).rotation.set(-.12, s * .1, s * -.03);
+      }
+    }
+
+    // nightstands: three drawers, brass bail pulls
+    function nightstand(z) {
+      const n = grp(X0 + .23, 0, z, scene, Math.PI / 2);
+      box(.5, .6, .42, M.wood, 0, .32, 0, n, .014);
+      box(.54, .035, .45, M.woodTop, 0, .635, .005, n, .01);
+      box(.46, .04, .38, M.woodDark, 0, .02, 0, n, .008);
+      [.52, .36, .16].forEach(y => {
+        box(.44, .14, .02, M.woodTop, 0, y, .215, n, .008);
+        box(.1, .012, .012, M.brass, 0, y, .232, n, .004);
+      });
+      return n;
+    }
+    const nsR = nightstand(-.03), nsL = nightstand(2.32);
+    // right: octopus plush, water bottle, Echo Show, remotes, a paperback
+    {
+      const TOP = .655, n = nsR;
+      const oc = grp(-.12, TOP, -.05, n, .4), orange = plushM('#f07a1c', '#ffc08a');
+      pb(oc, .075, orange, 0, .09, 0, 1, 1.15, 1);
+      for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; capsule(.018, .06, orange, Math.cos(a) * .06, .02, Math.sin(a) * .06, oc).rotation.set(Math.sin(a) * 1.2, 0, -Math.cos(a) * 1.2); }
+      for (const s of [-1, 1]) eye(oc, s * .026, .1, .062, .012);
+      cyl(.036, .036, .24, shiny('#1e3a8a', { roughness: .3 }), .12, TOP + .12, -.1, n);
+      cyl(.02, .02, .03, M.black, .12, TOP + .255, -.1, n, 12);
+      part(new THREE.TorusGeometry(.02, .005, 6, 16), M.black, .12, TOP + .28, -.1, n);
+      const echo = grp(.1, TOP, .1, n, -.2);
+      box(.15, .09, .06, std('#e8e6e1', { roughness: .6 }), 0, .045, 0, echo, .02).rotation.x = -.25;
+      const scr = plane(.1, .06, std('#000', { emissive: '#fff', emissiveMap: echoTex, emissiveIntensity: .9 }), 0, .05, .028, echo);
+      scr.rotation.x = -.25;
+      pager.position.set(-.02, TOP, .14); pager.rotation.y = -.35; n.add(pager);
+      box(.13, .03, .19, std('#2a2420', { roughness: .7 }), -.14, TOP + .015, .1, n, .006).rotation.y = -.2;
+    }
+    // left: lava lamp, owl plush, a bottle, and a kiwi plush by the lamp
+    {
+      const TOP = .655, n = nsL;
+      // lava lamp: a flared metal base, a tinted glass vessel you can see the wax through, and a cap
+      const ll = grp(-.13, TOP, -.03, n), llMetal = shiny('#8d9298', { metalness: .8, roughness: .35, envMapIntensity: .7 });
+      lathe([[0, 0], [.056, 0], [.058, .006], [.05, .03], [.036, .1], [.033, .104], [0, .104]], llMetal, 0, 0, 0, ll, 32);
+      const vessel = [[0, .102], [.03, .102], [.042, .13], [.048, .17], [.046, .21], [.038, .25], [.027, .285], [.022, .3], [0, .3]];
+      lathe(vessel, std('#2a55e0', { roughness: .08, transparent: true, opacity: .62, depthWrite: false, envMap: env, envMapIntensity: .8, emissive: '#2f62ff', emissiveIntensity: 1 }), 0, 0, 0, ll, 32).renderOrder = 2;
+      for (const [x, y, r, sy] of [[.004, .135, .026, .6], [-.008, .19, .016, 1.3], [.01, .24, .011, 1.1], [0, .215, .007, 1]]) noShadow(ball(r, glow('#ff9a2e', 2.2), x, y, 0, ll, 16)).scale.y = sy;
+      lathe([[0, .298], [.023, .298], [.019, .33], [.012, .345], [0, .345]], llMetal, 0, 0, 0, ll, 32);
+      // owl: round body, teal wings, a beak and ear tufts
+      const owl = grp(.02, TOP, -.15, n, .2), ow = plushM('#f2efe9'), teal = plushM('#5bb8b0', '#bff0ea');
+      pb(owl, .045, ow, 0, .045, 0, 1, 1.1, 1);
+      for (const s of [-1, 1]) {
+        pb(owl, .025, teal, s * .04, .045, -.005, .5, 1, 1);
+        eye(owl, s * .017, .06, .038, .009);
+        part(new THREE.ConeGeometry(.012, .03, 12), teal, s * .026, .098, 0, owl).rotation.z = -s * .4;
+      }
+      part(new THREE.ConeGeometry(.007, .016, 10), std('#e0a040'), 0, .048, .046, owl).rotation.x = Math.PI / 2 + .4;
+      // a white bottle with a shoulder, a neck and a cap
+      lathe([[0, 0], [.027, 0], [.029, .006], [.029, .15], [.022, .175], [.013, .185], [.013, .2], [0, .2]], std('#f2f2f0', { roughness: .35 }), .17, TOP, .12, n, 32);
+      cyl(.015, .015, .025, std('#3b4a78', { roughness: .5 }), .17, TOP + .21, .12, n, 20);
+      jar.position.set(-.02, TOP, .13); n.add(jar);
+      // kiwi: a fuzzy egg of a body, a small head, a long curved beak, stubby feet
+      const kiwi = grp(.17, TOP, -.12, n, -.6), kb = plushM('#6a5238', '#b8966a');
+      pb(kiwi, .055, kb, 0, .055, 0, 1, .85, 1.25);
+      pb(kiwi, .03, kb, 0, .08, .065);
+      for (const s of [-1, 1]) eye(kiwi, s * .018, .088, .088, .006);
+      cable([V(0, .075, .09), V(0, .062, .12), V(0, .04, .14)], .0045, std('#d8c49a', { roughness: .6 }), kiwi);
+      for (const s of [-1, 1]) pb(kiwi, .014, std('#c9a86a', { roughness: .7 }), s * .025, .006, .02, 1, .5, 1.6);
+    }
+    // the second floor lamp, in the corner behind the left nightstand, also on
+    {
+      const l2 = grp(X0 + .16, 0, Z1 - .16);
+      cyl(.12, .13, .025, shiny('#2a2826', { metalness: .6, roughness: .4 }), 0, .012, 0, l2, 32);
+      cyl(.01, .01, 1.36, shiny('#b8b3a5', { metalness: .7, roughness: .3 }), 0, .7, 0, l2, 12);
+      noShadow(part(new THREE.CylinderGeometry(.13, .16, .34, 40, 1, true), std('#f3c77a', { emissive: '#f3c77a', emissiveIntensity: .75, side: THREE.DoubleSide, roughness: .9 }), 0, 1.5, 0, l2));
+      const l2Light = new THREE.PointLight('#f6d49a', 1.6, 3.5, 2);
+      l2Light.position.set(X0 + .16, 1.5, Z1 - .16);
+      scene.add(l2Light);
+    }
+    // subwoofer tucked between the hutch and the nightstand
+    box(.28, .34, .24, std('#18181a', { roughness: .6 }), X0 + .18, .17, -.43, scene, .015);
+
+    // dresser in the far corner of the west wall, arched mirror, and the plush collection on top
+    const DZ = 1.52, DTOP = .88;
+    const dresser = grp(X1 - .25, 0, DZ, scene, -Math.PI / 2);
+    {
+      box(1.6, .8, .46, M.wood, 0, .44, 0, dresser, .016);
+      box(1.66, .04, .5, M.woodTop, 0, .86, .01, dresser, .012);
+      box(1.56, .05, .42, M.woodDark, 0, .025, 0, dresser, .01);
+      for (const x of [-.4, .4]) for (const y of [.71, .47, .23]) {
+        box(.76, .21, .02, M.woodTop, x, y, .235, dresser, .01);
+        box(.13, .016, .016, M.brass, x, y, .252, dresser, .006);
+      }
+      const arch = (w, y0, y1, rise) => { const s = new THREE.Shape(); s.moveTo(-w / 2, y0); s.lineTo(w / 2, y0); s.lineTo(w / 2, y1); s.quadraticCurveTo(0, y1 + rise, -w / 2, y1); s.closePath(); return s; };
+      const outer = arch(1.1, 0, .88, .28), inner = arch(.96, .07, .84, .22);
+      outer.holes.push(inner);
+      part(new THREE.ExtrudeGeometry(outer, { depth: .04, bevelEnabled: true, bevelThickness: .01, bevelSize: .01, bevelSegments: 2, curveSegments: 24 }), M.woodTop, 0, DTOP, -.2, dresser);
+      part(new THREE.ShapeGeometry(inner, 24), std('#a7aeb2', { metalness: 1, roughness: .05, envMap: env, envMapIntensity: 1.1 }), 0, DTOP, -.18, dresser);
+    }
+    {
+      const d = grp(0, DTOP, 0, dresser);
+      // two Stitches: big blue heads, huge ears, glossy black eyes
+      const blue = plushM('#3f6fd6', '#9fc2ff'), pale = plushM('#9cc3f0');
+      [[-.05, .02, 1], [.12, -.1, .9]].forEach(([x, z, k]) => {
+        const st = grp(x, 0, z, d, .1);
+        st.scale.setScalar(k);
+        pb(st, .1, blue, 0, .1, 0, 1, 1.05, .9);
+        pb(st, .06, pale, 0, .09, .06, 1, 1.1, .5);
+        const hd = grp(0, .29, .02, st);
+        pb(hd, .12, blue, 0, 0, 0, 1.2, .95, 1);
+        pb(hd, .06, pale, 0, -.03, .07, 1.3, .8, .7);
+        pb(hd, .022, std('#1b2a5c', { roughness: .4 }), 0, .005, .12, 1.4, 1, .8);
+        for (const s of [-1, 1]) {
+          eye(hd, s * .07, .02, .085, .032);
+          const e = pb(hd, .1, blue, s * .17, .09, -.02, .35, 1, .75);
+          e.rotation.z = -s * .9;
+          pb(hd, .07, plushM('#e58a95'), s * .175, .095, .005, .2, .85, .5).rotation.z = -s * .9;
+          capsule(.032, .06, blue, s * .11, .12, .04, st).rotation.z = s * .8;
+        }
+      });
+      // Snorlax: a fat pear of a body, cream belly and face, stubby arms and feet, pointed ears, sleeping
+      const sn = grp(.58, 0, -.1, d, -.2), snB = plushM('#3b86a8', '#9fd6ea'), snC = plushM('#efe3c6', '#ffffff');
+      lathe([[0, 0], [.2, .004], [.26, .05], [.285, .15], [.275, .27], [.235, .37], [.17, .44], [.085, .48], [0, .49]], snB, 0, 0, 0, sn, 40).scale.z = .72;
+      pb(sn, .21, snC, 0, .17, .085, 1.05, .95, .5);
+      pb(sn, .12, snC, 0, .36, .13, 1.4, .8, .45);
+      for (const s of [-1, 1]) {
+        box(.05, .006, .004, M.black, s * .045, .39, .158, sn, .002).rotation.z = s * .18;
+        const ear = part(new THREE.ConeGeometry(.045, .09, 20), snB, s * .15, .47, -.01, sn);
+        ear.rotation.z = -s * .45; ear.scale.z = .6;
+        const arm = pb(sn, .06, snB, s * .25, .26, .06, .7, 1.3, .8);
+        arm.rotation.z = s * .5;
+        pb(sn, .065, snC, s * .14, .03, .15, 1, .55, 1.2);
+        for (const k of [-1, 0, 1]) pb(sn, .012, snB, s * .14 + k * .025, .045, .21, 1, 1, .6);
+      }
+      box(.05, .012, .006, std('#c85a6a'), 0, .345, .158, sn, .004);
+      // white tiger lying along the front edge, one paw over the side
+      const tg = grp(.38, 0, .12, d), tigM = plushM('#fff', '#ffffff', tigerTex);
+      capsule(.085, .5, tigM, 0, .085, 0, tg).rotation.z = Math.PI / 2;
+      const th = grp(-.4, .13, .03, tg, -Math.PI / 2 + .5);
+      pb(th, .09, tigM, 0, 0, 0, 1, .95, 1.05);
+      pb(th, .045, plushM('#f6f1e6'), 0, -.03, .07, 1.1, .8, 1);
+      pb(th, .012, std('#d77a88'), 0, -.015, .11, 1.2, .8, .8);
+      for (const s of [-1, 1]) { eye(th, s * .035, .03, .075, .012); part(new THREE.ConeGeometry(.03, .05, 12), tigM, s * .05, .08, -.01, th).rotation.z = -s * .3; }
+      const pawM = plushM('#f6f1e6');
+      for (const [x, z] of [[-.3, .07], [.25, .07], [.25, -.07]]) capsule(.03, .08, pawM, x, .04, z, tg).rotation.x = Math.PI / 2;
+      capsule(.032, .1, pawM, -.24, -.03, .14, tg);
+      cable([V(.3, .1, 0), V(.45, .12, -.05), V(.52, .05, -.12)], .02, tigM, tg);
+      // iron golem plush: blocky and beige
+      const gm = plushM('#d8ccb0'), gl = grp(-.22, 0, .06, d, .2);
+      box(.14, .16, .08, gm, 0, .22, 0, gl, .02);
+      box(.1, .12, .1, gm, 0, .36, 0, gl, .02);
+      box(.02, .06, .02, gm, 0, .34, .06, gl, .006);
+      for (const s of [-1, 1]) { box(.05, .22, .05, gm, s * .1, .17, 0, gl, .015); box(.05, .14, .05, gm, s * .035, .07, 0, gl, .015); box(.02, .012, .005, std('#8a1f1f'), s * .025, .38, .052, gl, .003); }
+      // duck in a cowboy hat: a round body with a tail tip, a head, a flat bill, and a hat with a curled brim and a pinched crown
+      const dk = grp(-.1, 0, .17, d, -.2), duckB = plushM('#7a4a2a', '#c89a6a'), bill = plushM('#f2a930'), hatM = plushM('#e9e1cc');
+      pb(dk, .07, duckB, 0, .065, -.01, 1.1, .85, 1.2);
+      pb(dk, .03, duckB, 0, .1, -.09, .8, .7, 1).rotation.x = -.6;
+      pb(dk, .05, duckB, 0, .135, .05, 1, 1, 1);
+      pb(dk, .03, bill, 0, .125, .105, 1.3, .38, 1.1);
+      for (const s of [-1, 1]) { eye(dk, s * .025, .15, .09, .008); pb(dk, .03, duckB, s * .07, .07, 0, .5, .8, 1.1); }
+      const hat = grp(0, .17, .045, dk);
+      hat.rotation.x = -.2;
+      const brim = new THREE.LatheGeometry([[0, 0], [.06, 0], [.085, .008], [.095, .02], [.09, .024], [.075, .012], [.05, .006], [0, .006]].map(([a, b]) => new THREE.Vector2(a, b)), 32);
+      brim.scale(1, 1, .8);
+      part(brim, hatM, 0, 0, 0, hat);
+      lathe([[0, .006], [.045, .006], [.048, .03], [.04, .058], [.018, .062], [0, .052]], hatM, 0, 0, 0, hat, 32).scale.z = .8;
+      part(new THREE.TorusGeometry(.046, .005, 8, 32), std('#6a3e22'), 0, .014, 0, hat).rotation.x = Math.PI / 2;
+      // Texas basketball book leaning on the mirror, a Lego box, and clothes piled at the near end
+      box(.22, .28, .015, std('#b8431f', { roughness: .6 }), -.3, .15, -.16, d, .004).rotation.x = -.18;
+      // clothes: a crumpled pile, each piece a mound whose rim folds in and out
+      [['#1a1d24', -.62, .02, .15, .07, 1], ['#2a3550', -.7, -.08, .11, .05, 2], ['#16171a', -.55, -.12, .1, .035, 3], ['#5b7fb8', -.72, .13, .08, .03, 4]].forEach(([c, x, z, r, h, k]) => {
+        const g = new THREE.SphereGeometry(1, 36, 14, 0, Math.PI * 2, 0, Math.PI / 2), p = g.attributes.position;
+        for (let i = 0; i < p.count; i++) {
+          const px = p.getX(i), py = p.getY(i), pz = p.getZ(i), a = Math.atan2(pz, px), rim = 1 + .16 * Math.sin(a * 3 + k) + .08 * Math.sin(a * 7 - k * 2);
+          p.setXYZ(i, px * r * rim, py ** .7 * h * (1 + .35 * Math.sin(a * 5 + k * 3) * (1 - py)), pz * r * rim * .85);
+        }
+        g.computeVertexNormals();
+        part(g, fabric(c), x, .005 + (k > 2 ? .03 : 0), z, d).rotation.y = k;
+      });
+    }
+
+    // TV stand: black glass shelves between curved wood ends; a soundbar, a laptop, a lightsaber, Lego sets, a receiver
+    const tvs = grp(X1 - .25, 0, .05, scene, -Math.PI / 2);
+    {
+      const glassM = shiny('#0b0b0c', { roughness: .3, envMapIntensity: .14 });
+      for (const s of [-1, 1]) box(.07, .62, .46, M.wood, s * .6, .31, 0, tvs, .03);
+      for (const y of [.6, .36, .1]) box(1.14, .02, .44, glassM, 0, y, 0, tvs, .006);
+      box(.9, .07, .1, std('#111', { roughness: .5 }), 0, .645, .14, tvs, .02);
+      noShadow(box(.3, .004, .004, glow('#ffffff', .6), 0, .645, .191, tvs, .001));
+      const lap = grp(-.36, .61, .02, tvs, .1);
+      box(.36, .022, .25, std('#141414', { roughness: .35 }), 0, .011, 0, lap, .008);
+      noShadow(ball(.012, glow('#39d353', 1.4), 0, .023, 0, lap, 10)).scale.y = .2;
+      const saber = grp(.05, .64, .12, tvs, -.12);
+      rod(V(-.5, 0, 0), V(.28, 0, 0), .014, glow('#eef3ff', .45), saber, 12);
+      rod(V(.28, 0, 0), V(.52, 0, 0), .02, M.chrome, saber, 12);
+      for (const x of [.34, .4, .46]) part(new THREE.TorusGeometry(.021, .004, 6, 16), M.black, x, 0, 0, saber).rotation.y = Math.PI / 2;
+      box(.3, .08, .24, std('#1a1a1c', { roughness: .5 }), .38, .65, -.03, tvs, .006);
+      box(.26, .2, .07, std('#fff', { map: legoTex, roughness: .5 }), .38, .79, .04, tvs, .006);
+      box(.22, .005, .28, std('#f4f1ea', { roughness: .9 }), .4, .8925, -.02, tvs, .001).rotation.y = .2;
+      box(.44, .12, .34, std('#161618', { roughness: .45 }), .15, .43, -.02, tvs, .01);
+      noShadow(box(.12, .02, .004, glow('#3d8fe0', 1.8), .15, .45, .152, tvs, .002));
+      box(.3, .06, .25, std('#f0efec', { roughness: .4 }), -.3, .14, -.02, tvs, .012);
+      trophy.position.set(-.02, .61, -.08); tvs.add(trophy);
+    }
+    // calendar on the wall above the TV
+    plane(.28, .39, std('#fff', { map: calTex, roughness: .6 }), X1 - .004, 1.98, .42, west.full).rotation.y = -Math.PI / 2;
+    // the backpack and the tall Lego box between the dresser and the window
+    {
+      const bp = grp(X1 - .36, 0, Z1 - .24, scene, -2.4);
+      box(.32, .42, .18, std('#18191c', { roughness: .8 }), 0, .21, 0, bp, .07);
+      box(.24, .18, .06, std('#1f2024', { roughness: .8 }), 0, .14, .1, bp, .025);
+      part(new THREE.TorusGeometry(.05, .01, 6, 16, Math.PI), std('#18191c'), 0, .42, -.02, bp);
+      noShadow(box(.1, .03, .003, std('#e8e8e8'), 0, .14, .132, bp, .001));
+      box(.1, .5, .38, std('#fff', { map: legoTex, roughness: .5 }), X1 - .06, .26, DZ + .98, scene, .006).rotation.z = .05;
+    }
+
+    // closet door in the corner behind the PC, and a door off each side of the hall
+    function door(x, z, ry, w, m) {
+      const d = grp(x, 0, z, scene, ry), pm = std(m, { roughness: .5 });
+      box(w, 2.03, .04, std(m, { roughness: .6 }), 0, 1.015, .02, d, .008);
+      for (const sx of [-1, 1]) for (const [y, h] of [[1.74, .42], [1.17, .56], [.46, .66]]) box(w * .34, h, .012, pm, sx * w * .22, y, .045, d, .005);
+      for (const s of [-1, 1]) box(.06, 2.09, .02, M.trim, s * (w / 2 + .03), 1.045, .01, d);
+      box(w + .12, .06, .02, M.trim, 0, 2.06, .01, d);
+      ball(.024, M.brass, w / 2 - .07, .95, .07, d);
+      for (const y of [.25, 1.02, 1.8]) box(.018, .09, .03, M.brass, -w / 2 + .01, y, .03, d, .004);
+    }
+    door(2.61, Z0, 0, .68, '#d6d3cc');
+    door(DL, Z0 - T - .5, Math.PI / 2, .7, '#8b9196');
+    door(DR, Z0 - T - .5, -Math.PI / 2, .7, '#7f858a');
+
+    // on the floor: boots and sneakers by the office chair, a backpack by the hall
+    {
+      const bootM = std('#141414', { roughness: .45 }), shoeM = std('#f2f2f0', { roughness: .6 });
+      for (const [x, z, r] of [[-1.05, -1.05, .3], [-.92, -1.12, .1]]) {
+        const b = grp(x, .0125, z, scene, r);
+        box(.1, .3, .12, bootM, 0, .15, 0, b, .04);
+        box(.1, .08, .26, bootM, 0, .04, .07, b, .035);
+      }
+      for (const [x, z, r] of [[-.62, -.78, 1.2], [-.52, -.95, 1.6]]) {
+        const s = grp(x, .0125, z, scene, r);
+        box(.1, .07, .27, shoeM, 0, .035, 0, s, .03);
+        box(.108, .02, .28, std('#bdbdb8'), 0, .01, 0, s, .008);
+      }
+      const bp = grp(-.28, .0125, -1.45, scene, .6);
+      pb(bp, .2, std('#101316', { roughness: .7 }), 0, .1, 0, 1.2, .5, .8);
+      pb(bp, .12, std('#1d6b6a', { roughness: .6 }), .05, .12, .12, 1, .6, .5);
+    }
+
     // ceiling fan
     const fan = grp(-.35, H, .2);
     const fanM = shiny('#3d4145', { roughness: .45 });
@@ -1872,7 +2370,7 @@
     lathe([[0, .07], [.09, .065], [.13, .03], [.135, -.01], [.11, -.045], [0, -.05]], fanM, 0, -.21, 0, fan);
     lathe([[0, 0], [.1, 0], [.095, -.03], [.06, -.055], [0, -.062]], std('#fff4e2', { roughness: .5, emissive: '#fff4e2', emissiveIntensity: 1.6 }), 0, -.26, 0, fan);
     // the fan light is on, as in the photo: it's what makes the walls read light gray
-    const fanLight = new THREE.PointLight('#fff1dc', 7, 0, 2);
+    const fanLight = new THREE.PointLight('#fff3e2', 5.2, 0, 2);
     fanLight.position.set(-.35, H - .65, .2);
     scene.add(fanLight);
     const blades = grp(0, -.22, 0, fan);
@@ -1883,57 +2381,82 @@
     }
 
     // ----- light -----
-    scene.add(new THREE.HemisphereLight('#4c5157', '#1a1612', .95));
-    const moon = new THREE.DirectionalLight('#9fb0c2', .2);
-    moon.position.set(-4, 6, 7);
+    // evening: the lamps are the warm key; the cool fill is the night sky through the north window, a soft blue wash
+    // across the room and a moonlit patch on the floor below the sill
+    scene.add(new THREE.HemisphereLight('#586070', '#1c1712', .9));
+    const moon = new THREE.DirectionalLight('#8ea6cc', .28);
+    moon.position.set(.8, 4, 9);
     scene.add(moon);
+    const sill = new THREE.SpotLight('#7f9fd4', 5, 5, .62, 1, 1.5);
+    sill.position.set(WX, 2.3, Z1 + .4);
+    sill.target.position.set(WX - .2, 0, Z1 - 1.7);
+    scene.add(sill, sill.target);
+    // a faint cool fill from the viewer, so faces turned toward a cut-away wall (the back of the hutch, of the headboard)
+    // read as shaped wood instead of black slabs when the room is turned
+    const fill = new THREE.DirectionalLight('#b4c0d6', .15);
+    scene.add(fill, fill.target);
 
     // ----- camera, post -----
-    const HOME = { pos: V(1.5, 4.9, 9.6), target: V(-.05, .85, -.5), fov: 34 };
+    const HOME = { pos: V(1.5, 5.4, 11), target: V(-.05, .8, .15), fov: 34 };
     const PHOTO = { pos: V(.1, 1.4, 3.9), target: V(.1, 1.05, -2.2), fov: 54 };
     const cam = { pos: HOME.pos.clone(), target: HOME.target.clone(), fov: HOME.fov };
     const camera = new THREE.PerspectiveCamera(HOME.fov, 4 / 3, .05, 60);
-    const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
-    const composer = new EffectComposer(renderer, rt);
+    // only the scene itself is multisampled: it renders into its own MSAA target, and the post passes work on the
+    // resolved texture. With MSAA on the composer's buffers, every full-screen pass paid a resolve at retina size.
+    const sceneRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: pr > 1.5 ? 2 : 4 });
+    const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false }));
     composer.setPixelRatio(pr);
-    composer.addPass(new RenderPass(scene, camera));
+    composer.addPass(new TexturePass(sceneRT.texture));
+    // AO and bloom are soft by nature, so they run at half resolution: a quarter of the pixels for the same look
+    const half = (pass, k = .5) => { const set = pass.setSize.bind(pass); pass.setSize = (w, h) => set(Math.round(w * k), Math.round(h * k)); };
     const gtao = new GTAOPass(scene, camera, 1, 1);
-    gtao.blendIntensity = 1;
-    gtao.updateGtaoMaterial({ radius: .4, distanceExponent: 1.4, thickness: 1, scale: 1, samples: 16 });
-    gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 5, rings: 2, samples: 12 });
+    half(gtao);
+    // the AO pass draws every object as solid, so hide the steam sprites from it or they come out as dark smudges
+    { const r = gtao.render.bind(gtao); gtao.render = (...a) => { steam.forEach(s => s.visible = false); r(...a); steam.forEach(s => s.visible = true); }; }
+    gtao.blendIntensity = .9;
+    gtao.updateGtaoMaterial({ radius: .35, distanceExponent: 1.6, thickness: 1, scale: 1, samples: 10 });
+    gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 4, rings: 2, samples: 8 });
     composer.addPass(gtao);
-    const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), .45, .5, 1);
+    const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), .38, .55, 1.5);
+    half(bloom);
     composer.addPass(bloom);
-    composer.addPass(new OutputPass());
-    // tilt-shift: the top and bottom of the frame go soft, like a photo of a miniature
-    const tilt = new ShaderPass({
-      uniforms: { tDiffuse: { value: null }, amount: { value: 1 }, aspect: { value: 4 / 3 } },
-      vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: `uniform sampler2D tDiffuse; uniform float amount, aspect; varying vec2 vUv;
-        void main() {
-          float b = smoothstep(.16, .5, abs(vUv.y - .52)) * amount * .006;
-          vec4 c = texture2D(tDiffuse, vUv);
-          if (b > .0001) {
-            for (int i = 1; i < 13; i++) { float a = float(i) * 2.39996, r = sqrt(float(i) / 12.); c += texture2D(tDiffuse, vUv + vec2(cos(a) / aspect, sin(a)) * r * b); }
-            c /= 13.;
-          }
-          gl_FragColor = c;
-        }`,
-    });
+    // the output pass also does the tilt-shift (the top and bottom of the frame go soft, like a photo of a miniature),
+    // a faint vignette, and a fixed dither so the dark gradients don't band: one full-screen pass instead of two
+    const tilt = new OutputPass();
+    Object.assign(tilt.uniforms, { amount: { value: 1 }, aspect: { value: 4 / 3 } });
+    tilt.material.fragmentShader = tilt.material.fragmentShader
+      .replace('uniform sampler2D tDiffuse;', 'uniform sampler2D tDiffuse; uniform float amount, aspect;')
+      .replace('gl_FragColor = texture2D( tDiffuse, vUv );', `
+        float b = smoothstep(.16, .5, abs(vUv.y - .52)) * amount * .006;
+        vec4 c = texture2D(tDiffuse, vUv);
+        if (b > .0001) {
+          for (int i = 1; i < 9; i++) { float a = float(i) * 2.39996, r = sqrt(float(i) / 8.); c += texture2D(tDiffuse, vUv + vec2(cos(a) / aspect, sin(a)) * r * b); }
+          c /= 9.;
+        }
+        vec2 q = (vUv - .5) * vec2(aspect, 1.);
+        c.rgb *= 1. - amount * .22 * smoothstep(.35, 1.1, length(q));
+        gl_FragColor = c;`)
+      .replace(/}\s*$/, '  gl_FragColor.rgb += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - .5) / 255.;\n}');
     composer.addPass(tilt);
 
     // ----- hotspots: a real button over each object, re-projected as the camera moves -----
     const spots = [];
     function spot(key, group, lift, label) {
       group.updateWorldMatrix(true, true);
-      const b = new THREE.Box3().setFromObject(group), mats = [];
+      const b = new THREE.Box3().setFromObject(group), clones = new Map();
       group.traverse(o => {
         if (!o.isMesh || !o.material.emissive || o.material.emissive.getHex()) return;
-        o.material = o.material.clone();
-        o.material.emissive.copy(LAMP);
-        o.material.emissiveIntensity = 0;
-        mats.push(o.material);
+        if (!clones.has(o.material)) {
+          const m = o.material.clone();
+          m.onBeforeCompile = o.material.onBeforeCompile;
+          m.customProgramCacheKey = o.material.customProgramCacheKey;
+          m.emissive.copy(LAMP);
+          m.emissiveIntensity = 0;
+          clones.set(o.material, m);
+        }
+        o.material = clones.get(o.material);
       });
+      const mats = [...clones.values()];
       const corners = [];
       for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) corners.push(V(x, y, z));
       const btn = document.createElement('button');
@@ -1962,29 +2485,39 @@
     };
     view.append(...Object.values(buttons));
 
-    // everything that never moves is merged per material, so the detail costs vertices, not draw calls
+    // everything that never moves is merged per material, so the detail costs vertices, not draw calls. Things that do
+    // move (hotspots, walls that swap, the fan, the clock hands) are merged the same way inside their own group.
     {
-      const moving = new Set([...spots.map(s => s.group), blades, lanyard, tail, fleaves, dleaves, hourHand, minHand]);
-      const buckets = new Map();
+      const moving = new Set([...spots.map(s => s.group), ...sides.flatMap(s => [s.full, s.stub]), blades, lanyard, tail, fleaves, dleaves, hourHand, minHand]);
+      const buckets = new Map(), inv = new THREE.Matrix4(), animated = new Set([M.rgb, ...spots.flatMap(s => s.mats)]);
+      // materials that differ only in colour become one material with the colour carried per vertex
+      const proxy = m => {
+        const a = argsOf.get(m);
+        if (!a || animated.has(m)) return m;
+        return shared(m.constructor, { ...a, color: '#ffffff', vertexColors: true });
+      };
       scene.updateMatrixWorld(true);
       scene.traverse(o => {
         if (!o.isMesh || o.isInstancedMesh || !o.geometry.attributes.uv || o.material.vertexColors) return;
-        for (let p = o; p; p = p.parent) if (moving.has(p)) return;
-        const key = o.material.uuid + o.castShadow + o.receiveShadow;
-        if (!buckets.has(key)) buckets.set(key, []);
-        buckets.get(key).push(o);
+        let root = o.parent;
+        while (root !== scene && !moving.has(root)) root = root.parent;
+        const mat = proxy(o.material), key = root.uuid + mat.uuid + o.castShadow + o.receiveShadow;
+        if (!buckets.has(key)) buckets.set(key, { root, mat, list: [] });
+        buckets.get(key).list.push(o);
       });
-      for (const list of buckets.values()) {
-        if (list.length < 2) continue;
+      for (const { root, mat, list } of buckets.values()) {
+        if (list.length < 2 && mat === list[0].material) continue;
+        inv.copy(root.matrixWorld).invert();
         const geo = mergeGeometries(list.map(o => {
-          const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld);
-          for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k);
+          const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld.clone().premultiply(inv));
+          for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv', 'wear'].includes(k)) g.deleteAttribute(k);
+          if (mat.vertexColors) { const c = o.material.color, n = g.attributes.position.count; g.setAttribute('color', new THREE.BufferAttribute(Float32Array.from({ length: n * 3 }, (_, i) => c.toArray()[i % 3]), 3)); }
           return g;
         }));
         if (!geo) continue;
-        const m = new THREE.Mesh(geo, list[0].material);
+        const m = new THREE.Mesh(geo, mat);
         m.castShadow = list[0].castShadow; m.receiveShadow = list[0].receiveShadow;
-        scene.add(m);
+        root.add(m);
         list.forEach(o => o.removeFromParent());
       }
     }
@@ -2014,6 +2547,9 @@
         else { const m = (t.cy + u.cy) / 2; t.y1 = Math.min(t.y1, m); u.y0 = Math.max(u.y0, m); }
       }));
       spots.forEach((s, i) => {
+        let shown = true;
+        for (let o = s.group; o; o = o.parent) shown &&= o.visible;
+        s.btn.style.display = shown ? '' : 'none';
         const { x0, y0, x1, y1 } = boxes[i];
         const rect = [x0, y0, x1 - x0, y1 - y0].map(Math.round).join();
         if (rect === s.rect) return;
@@ -2030,6 +2566,9 @@
     }
     function setCam(to) { cam.pos.copy(to.pos); cam.target.copy(to.target); cam.fov = to.fov; }
     lampBtn.addEventListener('click', () => {
+      // bake any drag into the camera so the flight starts from where the room is actually being viewed
+      cam.pos.sub(cam.target).applyAxisAngle(Y, orbit.az).add(cam.target);
+      orbit.az = orbit.want = 0; orbit.drag = null;
       lit = !lit;
       lampBtn.setAttribute('aria-pressed', lit);
       lampBtn.setAttribute('aria-label', lit ? 'Turn off the lights' : 'Turn on the lights');
@@ -2041,6 +2580,24 @@
       else { stage.classList.remove('lit'); flyTo(HOME, 650); }
       invalidate();
     });
+
+    // ----- drag to turn the room, horizontally only; vertical swipes still scroll the page -----
+    const Y = V(0, 1, 0), orbit = { az: 0, want: 0, drag: null };
+    const AZ = 92 * deg, baseAz = Math.atan2(HOME.pos.x - HOME.target.x, HOME.pos.z - HOME.target.z);
+    canvas.style.touchAction = 'pan-y';
+    canvas.style.cursor = 'grab';
+    canvas.addEventListener('pointerdown', e => {
+      if (lit || flight || e.button) return;
+      orbit.drag = { x: e.clientX, az: orbit.want };
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = 'grabbing';
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!orbit.drag) return;
+      orbit.want = Math.max(-AZ - baseAz, Math.min(AZ - baseAz, orbit.drag.az - (e.clientX - orbit.drag.x) / view.clientWidth * Math.PI));
+      invalidate();
+    });
+    for (const ev of ['pointerup', 'pointercancel']) canvas.addEventListener(ev, () => { orbit.drag = null; canvas.style.cursor = 'grab'; });
 
     // ----- motion -----
     const motion = () => !reduced.matches;
@@ -2096,8 +2653,26 @@
       drawScreen(...NODES[3], -1, true);
     }
 
+    // if this GPU can't hold 60 fps, render fewer pixels: half a step of pixel ratio at a time, never back up
+    const pace = { last: 0, sum: 0, n: 0 };
+    function paceCheck(now) {
+      const dt = now - pace.last;
+      pace.last = now;
+      if (dt > 100 || flight) return;
+      pace.sum += dt;
+      if (++pace.n < 45) return;
+      if (pace.sum / pace.n > 19 && pr > 1) {
+        pr = Math.max(1, pr - .5);
+        renderer.setPixelRatio(pr);
+        composer.setPixelRatio(pr);
+        resize();
+      }
+      pace.sum = pace.n = 0;
+    }
+
     function render() {
       const now = performance.now(), moving = motion();
+      if (looping) paceCheck(now);
       if (moving) animate(now);
       if (flight) {
         const p = Math.max(0, Math.min(1, (now - flight.t0) / 1400)), e = p < .5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2;
@@ -2110,7 +2685,9 @@
       par.k += ((moving && !lit && !flight ? 1 : 0) - par.k) * (moving ? .06 : 1);
       tilt.uniforms.amount.value = Math.min(1, cam.pos.distanceTo(PHOTO.pos) / 2);
       par.x += (ptr.x - par.x) * .05; par.y += (ptr.y - par.y) * .05;
-      camera.position.copy(cam.pos);
+      orbit.az += (orbit.want - orbit.az) * (moving ? .14 : 1);
+      if (Math.abs(orbit.want - orbit.az) < 1e-4) orbit.az = orbit.want;
+      camera.position.copy(cam.pos).sub(cam.target).applyAxisAngle(Y, orbit.az).add(cam.target);
       camera.lookAt(cam.target);
       camera.updateMatrix();
       camera.position.addScaledVector(right.setFromMatrixColumn(camera.matrix, 0), par.x * .45 * par.k).addScaledVector(upv.setFromMatrixColumn(camera.matrix, 1), -par.y * .25 * par.k);
@@ -2118,15 +2695,22 @@
       camera.fov = cam.fov;
       camera.updateProjectionMatrix();
       camera.updateMatrixWorld();
-      let settling = !!flight;
+      fill.position.copy(camera.position); fill.target.position.copy(cam.target);
+      fill.intensity = .15 + .75 * Math.min(1, Math.abs(orbit.az) / (60 * deg));
+      for (const s of sides) { const cut = s.outside(camera.position); s.full.visible = !cut; s.stub.visible = cut; }
+      let settling = !!flight || orbit.az !== orbit.want;
       for (const s of spots) {
         const want = s.btn.matches(':hover') || s.btn.matches(':focus-visible') || s.btn.classList.contains('on') ? 1 : 0;
+        const k0 = s.k;
         s.k += (want - s.k) * (moving ? .2 : 1);
         if (Math.abs(want - s.k) < .001) s.k = want; else settling = true;
+        if (s.k !== k0) renderer.shadowMap.needsUpdate = true;
         s.group.position.copy(s.base).addScaledVector(s.lift, s.k);
         for (const m of s.mats) m.emissiveIntensity = s.k * .35;
       }
       project();
+      renderer.setRenderTarget(sceneRT);
+      renderer.render(scene, camera);
       composer.render();
       if (!looping && settling) invalidate();
     }
@@ -2148,6 +2732,7 @@
       const w = view.clientWidth, h = view.clientHeight;
       renderer.setSize(w, h, false);
       composer.setSize(w, h);
+      sceneRT.setSize(w * pr, h * pr);
       tilt.uniforms.aspect.value = w / h;
       camera.aspect = w / h;
       invalidate();
