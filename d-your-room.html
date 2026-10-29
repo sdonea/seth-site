@@ -5,21 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sebastian “Seth” Donea</title>
 <meta name="description" content="My actual room in Evansville, Indiana. Click anything that glows to see what I'm working on.">
-<!-- link previews: og:image needs an absolute URL once the site has a domain -->
+<!-- link previews: og:image and og:url are absolute so scrapers can resolve them -->
+<link rel="canonical" href="https://www.sebastiandonea.com/">
+<meta property="og:url" content="https://www.sebastiandonea.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Sebastian “Seth” Donea">
 <meta property="og:description" content="My actual room in Evansville, Indiana. Click anything that glows to see what I'm working on.">
-<meta property="og:image" content="og.png">
+<meta property="og:image" content="https://www.sebastiandonea.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A 3D model of Seth's bedroom with glowing hotspots on the things he's working on">
 <meta name="twitter:card" content="summary_large_image">
-<!-- who this page is about, for search engines. Add "url" and an absolute "image" once the site has a domain -->
+<!-- who this page is about, for search engines -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Sebastian Donea",
+  "url": "https://www.sebastiandonea.com/",
+  "image": "https://www.sebastiandonea.com/og.png",
   "alternateName": "Seth Donea",
   "description": "Founder of PageMD, an AI paging service for outpatient clinics. Student at Signature School in Evansville, Indiana, class of 2027.",
   "email": "mailto:sebdonea@gmail.com",
@@ -829,12 +833,12 @@
       <div class="role">Builder · the glowing chart above the bed</div>
       <video class="clip" src="media/holomap.mp4" poster="media/holomap.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="Holomap: live ocean currents drift across a glowing holotable and a fuel-saving route is plotted through the Gulf Stream"></video>
       <p><i>A straight line is the shortest way across the sea, but rarely the cheapest.</i> Holomap pulls today's ocean currents, the 16-day wind forecast and live ship positions, draws them on a glowing tactical table, and <b>plans the route that spends the least fuel.</b></p>
-      <p>Every day a GitHub Action runs the planner on <b>58 trips</b> off the US East Coast and posts the biggest saving. <a href="https://holomap-eight.vercel.app" target="_blank" rel="noopener">holomap-eight.vercel.app</a></p>
+      <p>Every day a GitHub Action runs the planner on <b>58 trips</b> off the US East Coast and posts the biggest saving. <a href="https://holomap.app" target="_blank" rel="noopener">holomap.app</a></p>
     </li>
     <li id="dove">
       <h3>Dove</h3>
       <div class="role">Builder · the drone flying around the room</div>
-      <video class="clip" src="media/dove.mp4" poster="media/dove.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="Dove's 3D replays: a night flyover of the city, takeoff from the pad, following the subject in the red hoodie by day, searching after losing them at night with escape routes marked covered or open, and the thermal camera at night"></video>
+      <video class="clip" src="media/dove.mp4" poster="media/dove.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="A walkthrough of the Dove site: the drone that watches your six, speaking the mission, asking instead of guessing, searching after losing the subject, and the operator console"></video>
       <p><b>A drone that works as a police officer's sidekick:</b> it keeps eyes on a subject so nobody goes in blind, and <i>it decides nothing about people.</i> Tell it "follow the person in the red hoodie" and it finds them with its own camera, follows from 20–30 m, searches when they duck behind a building, picks them back up, and flies home on command. <b>No face recognition;</b> it only knows people by what they're wearing.</p>
       <p><i>Simulation only so far:</i> a PX4 autopilot in Gazebo, YOLO tracking, and a safety supervisor that every command passes through. In the scored demo it <b>found the target again 7 seconds after losing them, with zero safety violations.</b> <a href="https://dove-kohl.vercel.app" target="_blank" rel="noopener">dove-kohl.vercel.app</a></p>
     </li>
