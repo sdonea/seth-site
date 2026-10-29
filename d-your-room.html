@@ -88,6 +88,10 @@
   .hotbtn.hot.star::before, .hotbtn.hot.star::after { top: -9px; right: -9px; width: 18px; height: 18px; }
   .hotbtn.hot.star::before { background: #ffd98a; box-shadow: 0 0 14px 4px #f3c77aaa; }
   .hotbtn.hot.star::after { border-width: 3px; animation-duration: 1.6s; }
+  /* once a spot's note has been opened its dot dims and stops pinging, so you can tell what's left */
+  .hot.seen .pip { opacity: .3; }
+  .hot.seen .pip-ring, .hotbtn.hot.seen::after { animation: none; opacity: 0; }
+  .hotbtn.hot.seen::before { opacity: .3; box-shadow: none; }
   .steam { animation: steam 3.2s ease-out infinite; }
   @keyframes steam { 0% { transform: translateY(4px); opacity: 0 } 30% { opacity: .6 } 100% { transform: translateY(-14px); opacity: 0 } }
   .sway { animation: sway 5s ease-in-out infinite; }
@@ -137,8 +141,17 @@
   .plain h3 { font-family: "Young Serif", serif; font-weight: 400; font-size: 24px; margin: 0; }
   .plain .role { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--lamp); margin: 2px 0 8px; }
   .plain p { margin: 0 0 8px; color: #d6cfbf; font-size: 15px; }
+  .plain p b, .panel p b { font-weight: 600; }
+  .plain p b { color: #fff8ea; }
+  .plain p i { color: #e9dcc0; }
   .clip { display: block; width: 100%; height: auto; margin: 4px 0 12px; border-radius: 4px; background: #000; }
+  iframe.clip { aspect-ratio: 16 / 9; border: 0; }
   .outside { margin: 32px 0 0; color: var(--muted); font-size: 14px; }
+  /* a rule on each side with the résumé link centered between them */
+  .plain .resume { display: flex; align-items: center; gap: 20px; margin: 48px 0 0; font-size: 16px; }
+  .resume::before, .resume::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+  .resume a { text-decoration: none; border-bottom: 1px solid #f3c77a66; padding-bottom: 2px; white-space: nowrap; }
+  .resume a:hover, .resume a:focus-visible { border-bottom-color: var(--lamp); }
   footer { border-top: 1px solid var(--line); padding: 20px 24px; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
 
   @media (max-width: 860px) {
@@ -805,30 +818,44 @@
     <li id="pagemd">
       <h3>PageMD</h3>
       <div class="role">Founder · the pager on the nightstand</div>
-      <img class="clip" src="media/pagemd.jpg" width="640" height="336" alt="PageMD: conversational AI for clinical paging. Giving nurses their time back.">
-      <p>An AI agent that triages inbound calls and pages on-call staff at outpatient clinics. My mom is a doctor and her pager kept interrupting dinner. Doctors can't be taken out of the loop, so we build for the nurses and staff on the other end.</p>
-      <p>I lead a 3-person team; we're in beta at 2 clinics in Vanderburgh County. 1st at regionals, 3rd of 1,174 at the STARTedUP Challenge final, $5,500 in funding · <a href="https://pagemd.ai">pagemd.ai</a></p>
+      <iframe class="clip" src="https://www.youtube-nocookie.com/embed/kf035gLilgY" width="640" height="360" loading="lazy" title="PageMD video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <p><b>An AI agent that triages inbound calls and pages on-call staff</b> at outpatient clinics. <i>My mom is a doctor and her pager kept interrupting dinner.</i> Doctors can't be taken out of the loop, so we build for the nurses and staff on the other end.</p>
+      <p>I lead a 3-person team; we're <b>in beta at 2 clinics</b> in Vanderburgh County. 1st at regionals, <b>3rd of 1,174 at the STARTedUP Challenge final</b>, $5,500 in funding ·<a href="https://pagemd.ai" target="_blank" rel="noopener">pagemd.ai</a></p>
       <img class="clip" src="media/pagemd-stage.jpg" width="640" height="612" loading="lazy" alt="Seth and his two PageMD teammates on stage at the STARTedUP Challenge, holding the prize check in front of the PageMD slide">
 
     </li>
-    <li id="hh">
-      <h3>Helping Hands</h3>
-      <div class="role">Developer · the trophy on the TV stand</div>
-      <p>Community service runs on paper and trust. Volunteers find shifts, organizations confirm hours in a two-step handshake, and every hour ends up on a signed record.</p>
-      <p>The team won the University of Evansville High School Changemaker Challenge (champion, full-tuition prize), then brought me on to build the website and platform. <a href="https://helping-hands-mu.vercel.app">helping-hands-mu.vercel.app</a></p>
-    </li>
-    <li id="send">
-      <h3>Send Energy</h3>
-      <div class="role">Operator · the jar by the lava lamp</div>
-      <p>Pre-workout gummies. I built the store and a custom checkout myself, and it has taken live payments since August 2026.</p>
-      <p><a href="https://lifefuel-web.vercel.app">lifefuel-web.vercel.app</a></p>
+    <li id="holomap">
+      <h3>Holomap</h3>
+      <div class="role">Builder · the glowing chart above the bed</div>
+      <video class="clip" src="media/holomap.mp4" poster="media/holomap.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="Holomap: live ocean currents drift across a glowing holotable and a fuel-saving route is plotted through the Gulf Stream"></video>
+      <p><i>A straight line is the shortest way across the sea, but rarely the cheapest.</i> Holomap pulls today's ocean currents, the 16-day wind forecast and live ship positions, draws them on a glowing tactical table, and <b>plans the route that spends the least fuel.</b></p>
+      <p>Every day a GitHub Action runs the planner on <b>58 trips</b> off the US East Coast and posts the biggest saving. <a href="https://holomap-eight.vercel.app" target="_blank" rel="noopener">holomap-eight.vercel.app</a></p>
     </li>
     <li id="dove">
       <h3>Dove</h3>
       <div class="role">Builder · the drone flying around the room</div>
       <video class="clip" src="media/dove.mp4" poster="media/dove.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="Dove's 3D replays: a night flyover of the city, takeoff from the pad, following the subject in the red hoodie by day, searching after losing them at night with escape routes marked covered or open, and the thermal camera at night"></video>
-      <p>A drone that works as a police officer's sidekick: it keeps eyes on a subject so nobody goes in blind, and it decides nothing about people. Tell it "follow the person in the red hoodie" and it finds them with its own camera, follows from 20–30 m, searches when they duck behind a building, picks them back up, and flies home on command. No face recognition; it only knows people by what they're wearing.</p>
-      <p>Simulation only so far: a PX4 autopilot in Gazebo, YOLO tracking, and a safety supervisor that every command passes through. In the scored demo it found the target again 7 seconds after losing them, with zero safety violations. <a href="https://dove-kohl.vercel.app">dove-kohl.vercel.app</a></p>
+      <p><b>A drone that works as a police officer's sidekick:</b> it keeps eyes on a subject so nobody goes in blind, and <i>it decides nothing about people.</i> Tell it "follow the person in the red hoodie" and it finds them with its own camera, follows from 20–30 m, searches when they duck behind a building, picks them back up, and flies home on command. <b>No face recognition;</b> it only knows people by what they're wearing.</p>
+      <p><i>Simulation only so far:</i> a PX4 autopilot in Gazebo, YOLO tracking, and a safety supervisor that every command passes through. In the scored demo it <b>found the target again 7 seconds after losing them, with zero safety violations.</b> <a href="https://dove-kohl.vercel.app" target="_blank" rel="noopener">dove-kohl.vercel.app</a></p>
+    </li>
+    <li id="fielddex">
+      <h3>Field Dex</h3>
+      <div class="role">Builder · the cards on the bed</div>
+      <video class="clip" src="media/fielddex.mp4" poster="media/fielddex.jpg" width="640" height="400" muted loop playsinline preload="none" aria-label="Field Dex: a ZIP code is typed in and a grid of wildlife cards appears, rarest first, with a holographic Legendary card tilting under the pointer"></video>
+      <p>Enter a US ZIP code and <b>every species people logged on iNaturalist within 10 km this week becomes a collectible card,</b> rarest first. <i>The dove on your feeder is Common; the fly someone photographed down the road might be one of a few hundred ever logged.</i></p>
+      <p>Every evening a GitHub Action posts the rarest find near Evansville. <a href="https://fielddex-delta.vercel.app" target="_blank" rel="noopener">fielddex-delta.vercel.app</a></p>
+    </li>
+    <li id="hh">
+      <h3>Helping Hands</h3>
+      <div class="role">Developer · the trophy on the TV stand</div>
+      <p><i>Community service runs on paper and trust.</i> Volunteers find shifts, organizations confirm hours in a two-step handshake, and <b>every hour ends up on a signed record.</b></p>
+      <p>The team <b>won the University of Evansville High School Changemaker Challenge</b> (champion, full-tuition prize), then brought me on to build the website and platform. <a href="https://helping-hands-mu.vercel.app" target="_blank" rel="noopener">helping-hands-mu.vercel.app</a></p>
+    </li>
+    <li id="send">
+      <h3>Send Energy</h3>
+      <div class="role">Operator · the jar by the lava lamp</div>
+      <p><b>Pre-workout gummies.</b> I built the store and a custom checkout myself, and it has <b>taken live payments since August 2026.</b></p>
+      <p><a href="https://lifefuel-web.vercel.app" target="_blank" rel="noopener">lifefuel-web.vercel.app</a></p>
     </li>
     <li id="honors">
       <h3>Honors</h3>
@@ -844,73 +871,60 @@
         <li>AP Capstone Diploma</li>
       </ul>
     </li>
-    <li id="holomap">
-      <h3>Holomap</h3>
-      <div class="role">Builder · the glowing chart above the bed</div>
-      <video class="clip" src="media/holomap.mp4" poster="media/holomap.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="Holomap: live ocean currents drift across a glowing holotable and a fuel-saving route is plotted through the Gulf Stream"></video>
-      <p>A straight line is the shortest way across the sea, but rarely the cheapest. Holomap pulls today's ocean currents, the 16-day wind forecast and live ship positions, draws them on a glowing tactical table, and plans the route that spends the least fuel.</p>
-      <p>Every day a GitHub Action runs the planner on 58 trips off the US East Coast and posts the biggest saving. <a href="https://holomap-eight.vercel.app">holomap-eight.vercel.app</a></p>
-    </li>
-    <li id="fielddex">
-      <h3>Field Dex</h3>
-      <div class="role">Builder · the cards on the bed</div>
-      <video class="clip" src="media/fielddex.mp4" poster="media/fielddex.jpg" width="640" height="400" muted loop playsinline preload="none" aria-label="Field Dex: a ZIP code is typed in and a grid of wildlife cards appears, rarest first, with a holographic Legendary card tilting under the pointer"></video>
-      <p>Enter a US ZIP code and every species people logged on iNaturalist within 10 km this week becomes a collectible card, rarest first. The dove on your feeder is Common; the fly someone photographed down the road might be one of a few hundred ever logged.</p>
-      <p>Every evening a GitHub Action posts the rarest find near Evansville. <a href="https://fielddex-delta.vercel.app">fielddex-delta.vercel.app</a></p>
-    </li>
     <li id="mentoring">
       <h3>Alumni Mentoring</h3>
       <div class="role">Founder · Signature School · the pennant by the hutch</div>
-      <p>My school had no alumni network, so I started one. I recruit mentors, match them with current students, and track check-ins. 22 pairs and about 100 mentoring hours so far.</p>
+      <p><i>My school had no alumni network,</i> so I started one. I recruit mentors, match them with current students, and track check-ins. <b>22 pairs and about 100 mentoring hours so far.</b></p>
     </li>
     <li id="cvl">
       <h3>Circular Venture Lab</h3>
       <div class="role">Intern since June 2025 · the lanyard on the door</div>
-      <p>Wrote the CultivatID healthcare talent pipeline strategy: a 20-question intake form, 4 benchmarked state programs, and 8 retention strategies. To keep going through senior year, I got my school to bring back an internship course it hadn't offered since 2003.</p>
+      <p><b>Wrote the CultivatID healthcare talent pipeline strategy:</b> a 20-question intake form, 4 benchmarked state programs, and 8 retention strategies. To keep going through senior year, I <b>got my school to bring back an internship course</b> <i>it hadn't offered since 2003.</i></p>
     </li>
     <li id="now">
       <h3>Does a knowledge graph actually help?</h3>
       <div class="role">Research, starting fall 2026 · the monitor</div>
-      <p>Every "company brain" assumes a knowledge graph makes AI answers better. I'm measuring it: hybrid retrieval vs GraphRAG on the Rust RFC corpus, with questions I write by hand. If the graph doesn't help, that's the finding.</p>
+      <p>Every "company brain" <i>assumes</i> a knowledge graph makes AI answers better. <b>I'm measuring it:</b> hybrid retrieval vs GraphRAG on the Rust RFC corpus, with questions I write by hand. <i>If the graph doesn't help, that's the finding.</i></p>
     </li>
     <li id="ee">
       <h3>Does private equity make dental care worse?</h3>
       <div class="role">Research · the books at the foot of the bed</div>
-      <p>For my IB Extended Essay I coded 300 patient reviews across PE-owned and independent dental practices. Continuity of care dropped significantly at the acquired ones.</p>
+      <p>For my <i>IB Extended Essay</i> I <b>coded 300 patient reviews</b> across PE-owned and independent dental practices. <b>Continuity of care dropped significantly at the acquired ones.</b></p>
     </li>
     <li id="mock">
       <h3>Mock Trial</h3>
       <div class="role">Captain · the certificate by the TV</div>
-      <p>Outstanding Witness from the Indiana State Bar Association. I run case strategy and witness prep, and took the team to state, where we placed top 20.</p>
+      <p><b>Outstanding Witness</b> from the Indiana State Bar Association. I run case strategy and witness prep, and <b>took the team to state, where we placed top 20.</b></p>
     </li>
     <li id="yg">
       <h3>Indiana Youth and Government</h3>
       <div class="role">Governor's Cabinet · the ribbons on the wall</div>
-      <p>Wrote a bill that passed both chambers and was signed by the Youth Governor, which about 10 of 150 bills do. Appointed to the 4-person Governor's Cabinet from about 20 applicants.</p>
+      <p><b>Wrote a bill that passed both chambers and was signed by the Youth Governor,</b> <i>which about 10 of 150 bills do.</i> <b>Appointed to the 4-person Governor's Cabinet</b> from about 20 applicants.</p>
     </li>
     <li id="tutoring">
       <h3>Tutoring</h3>
       <div class="role">SAT &amp; AP Physics 1 · Elite Tutoring Place · the books on the gaming chair</div>
-      <p>I diagnose gaps from practice tests, write study plans, and retest weekly. 9 students, average gain of 186 SAT points.</p>
+      <p>I diagnose gaps from practice tests, write study plans, and retest weekly. <b>9 students, average gain of 186 SAT points.</b></p>
     </li>
     <li id="skate">
       <h3>Skateboarding</h3>
       <div class="role">Outside of work · the board on the floor</div>
-      <p>I skateboard two or three times a week if I have the time. I'm still learning. Landed my first pop shove-it recently.</p>
+      <p>I skateboard two or three times a week if I have the time. <i>I'm still learning.</i> <b>Landed my first pop shove-it recently.</b></p>
     </li>
     <li id="pingpong">
       <h3>Table Tennis</h3>
       <div class="role">Outside of work · the paddle on the floor</div>
-      <p>I love table tennis. Currently running a STIGA Cybershape Eclipse. HMU for a 1v1.</p>
+      <p>I love table tennis. Currently running a <i>STIGA Cybershape Eclipse.</i> <b>HMU for a 1v1.</b></p>
     </li>
   </ol>
-  <p class="outside">Outside of work I also play League of Legends, and I speak conversational Romanian and French.</p>
+  <p class="outside">Outside of work I also play League of Legends (<i>Pyke main</i>), and I speak conversational Romanian and French.</p>
+  <p class="resume"><a href="resume.pdf" target="_blank" rel="noopener">Click here for my full résumé</a></p>
 </section>
 
 
 <footer>
   <span>Sebastian “Seth” Donea · Signature School, class of 2027</span>
-  <span><a href="https://www.linkedin.com/in/sebastian-donea/">LinkedIn</a> · <a href="https://github.com/sdonea">GitHub</a> · <a href="mailto:sebdonea@gmail.com">Email</a> · <a href="resume.pdf">Résumé</a></span>
+  <span><a href="https://www.linkedin.com/in/sebastian-donea/" target="_blank" rel="noopener">LinkedIn</a> · <a href="https://github.com/sdonea" target="_blank" rel="noopener">GitHub</a> · <a href="mailto:sebdonea@gmail.com">Email</a> · <a href="resume.pdf" target="_blank" rel="noopener">Résumé</a></span>
 </footer>
 
 <script type="importmap">
@@ -935,6 +949,10 @@
   }
   clips(document.querySelector('.plain'));
   let hots = []; // the clickable objects: SVG groups in the fallback, buttons over the canvas otherwise
+  // which notes this visitor has already opened, remembered across visits when storage allows
+  const seen = new Set();
+  try { JSON.parse(localStorage.getItem('room-seen') || '[]').forEach(k => seen.add(k)); } catch (e) {}
+  const markSeen = () => hots.forEach(h => h.classList.toggle('seen', seen.has(h.dataset.key)));
   // the note pops out beside whatever was clicked, on whichever side has room
   function place(el) {
     const s = stage.getBoundingClientRect(), o = el.getBoundingClientRect();
@@ -956,12 +974,19 @@
     body.innerHTML = document.getElementById(key).innerHTML;
     clips(body);
     hots.forEach(h => h.classList.toggle('on', h.dataset.key === key));
+    seen.add(key);
+    try { localStorage.setItem('room-seen', JSON.stringify([...seen])); } catch (e) {}
+    markSeen();
     panel.classList.remove('open');
     place(el);
     void panel.offsetWidth;
     panel.classList.add('open');
   }
-  function close() { panel.classList.remove('open'); hots.forEach(h => h.classList.remove('on')); }
+  function close() {
+    panel.classList.remove('open');
+    hots.forEach(h => h.classList.remove('on'));
+    body.querySelectorAll('iframe').forEach(f => f.remove()); // stop a playing video when its note closes
+  }
   const press = fn => e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } };
   document.addEventListener('click', e => { if (!panel.contains(e.target) && !e.target.closest('.hot')) close(); });
   document.getElementById('close').addEventListener('click', close);
@@ -971,6 +996,7 @@
   // ---------- fallback: the hand-drawn SVG ----------
   function svgRoom() {
     hots = view.querySelectorAll('svg .hot');
+    markSeen();
     hots.forEach(h => {
       h.addEventListener('click', () => open(h.dataset.key, h));
       h.addEventListener('keydown', press(() => open(h.dataset.key, h)));
@@ -1455,15 +1481,16 @@
     }
     // a bed pillow: a soft rectangle whose thickness falls off smoothly toward a seam all round, with no ridge along the
     // diagonals (pillowGeo's max() taper creases there, which reads as a pyramid on something this plain)
-    function bedPillowGeo(w, h, d, seed = 1) {
+    // `square` and `edge` let a pillow stood on end keep square corners and a full edge, so it doesn't read as a curled sheet
+    function bedPillowGeo(w, h, d, seed = 1, { square = .35, round = 4, edge = .12, fall = 5, puff = .7 } = {}) {
       const g = new THREE.SphereGeometry(1, 48, 32), p = g.attributes.position, uv = g.attributes.uv;
       for (let i = 0; i < p.count; i++) {
         const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-        const sx = Math.sign(x) * Math.abs(x) ** .35, sz = Math.sign(z) * Math.abs(z) ** .35;
+        const sx = Math.sign(x) * Math.abs(x) ** square, sz = Math.sign(z) * Math.abs(z) ** square;
         uv.setXY(i, sx * w / 2 / .06, sz * d / 2 / .06);
-        const r = Math.min(1, (sx ** 4 + sz ** 4) ** .25), t = Math.sqrt(Math.max(0, 1 - r ** 5));
+        const r = Math.min(1, (Math.abs(sx) ** round + Math.abs(sz) ** round) ** (1 / round)), t = Math.sqrt(Math.max(0, 1 - r ** fall));
         const dent = .05 * t * Math.sin(sx * 2.7 + seed) * Math.sin(sz * 2.1 - seed);
-        p.setXYZ(i, sx * w / 2, (Math.sign(y) * Math.abs(y) ** .7 * (.12 + .88 * t) + (y > 0 ? dent : 0)) * h / 2, sz * d / 2);
+        p.setXYZ(i, sx * w / 2, (Math.sign(y) * Math.abs(y) ** puff * (edge + (1 - edge) * t) + (y > 0 ? dent : 0)) * h / 2, sz * d / 2);
       }
       g.computeVertexNormals();
       return g;
@@ -2248,7 +2275,7 @@
       // pillows: two leaning on the headboard, two lying in front, each a little rotated and dented differently
       const pillowM = fabric('#f7f5f0');
       for (const s of [-1, 1]) {
-        part(bedPillowGeo(.7, .15, .5, s + 2), pillowM, s * .39, .8, .3, bed).rotation.set(-1.15, s * .04, s * .02);
+        part(bedPillowGeo(.7, .22, .5, s + 2, { square: .2, round: 8, edge: .55, fall: 14, puff: .35 }), pillowM, s * .39, .8, .28, bed).rotation.set(1.25, s * .04, s * .02);
         part(bedPillowGeo(.64, .13, .42, s * 3), pillowM, s * .36 + .02, .655, .63, bed).rotation.set(-.2, s * .08, s * -.02);
       }
     }
@@ -2810,6 +2837,7 @@
       }
     }
     hots = spots.map(s => s.btn);
+    markSeen();
     hots.forEach(b => b.addEventListener('click', () => open(b.dataset.key, b)));
     document.addEventListener('click', invalidate);
     document.addEventListener('keydown', invalidate);
