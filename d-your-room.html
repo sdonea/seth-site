@@ -4,10 +4,38 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sebastian “Seth” Donea</title>
-<link rel="icon" href="data:,">
+<meta name="description" content="My actual room in Evansville, Indiana. Click anything that glows to see what I'm working on.">
+<!-- link previews: og:image needs an absolute URL once the site has a domain -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sebastian “Seth” Donea">
+<meta property="og:description" content="My actual room in Evansville, Indiana. Click anything that glows to see what I'm working on.">
+<meta property="og:image" content="og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A 3D model of Seth's bedroom with glowing hotspots on the things he's working on">
+<meta name="twitter:card" content="summary_large_image">
+<!-- who this page is about, for search engines. Add "url" and an absolute "image" once the site has a domain -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Sebastian Donea",
+  "alternateName": "Seth Donea",
+  "description": "Founder of PageMD, an AI paging service for outpatient clinics. Student at Signature School in Evansville, Indiana, class of 2027.",
+  "email": "mailto:sebdonea@gmail.com",
+  "jobTitle": "Founder",
+  "worksFor": { "@type": "Organization", "name": "PageMD", "url": "https://pagemd.ai" },
+  "affiliation": { "@type": "HighSchool", "name": "Signature School", "address": { "@type": "PostalAddress", "addressLocality": "Evansville", "addressRegion": "IN", "addressCountry": "US" } },
+  "homeLocation": { "@type": "Place", "name": "Evansville, Indiana" },
+  "knowsLanguage": ["en", "ro", "fr"],
+  "award": ["National Merit Scholarship Semifinalist", "Morehead-Cain Nominee", "Presidential Scholars Nominee", "Rising Star of Indiana", "Romanian Heritage Awards National Laureate: Gold Award"],
+  "sameAs": ["https://www.linkedin.com/in/sebastian-donea/", "https://github.com/sdonea"]
+}
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #15181b;
@@ -23,6 +51,21 @@
   header { max-width: 1200px; margin: 0 auto; padding: 32px 24px 8px; display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
   header h1 { font-family: "Young Serif", Georgia, serif; font-weight: 400; font-size: 40px; margin: 0; line-height: 1; }
   header p { margin: 8px 0 0; color: var(--muted); font-size: 14px; max-width: 38em; }
+  /* name across the top; below it the photo and the three bio paragraphs share one row as four columns,
+     and the photo stretches to exactly the height of the tallest paragraph */
+  .who { flex: 1 1 100%; display: grid; grid-template-columns: 228px 1fr; column-gap: 40px; row-gap: 24px; }
+  .intro { display: contents; }
+  .who h1 { grid-column: 1 / -1; grid-row: 1; }
+  .me { grid-column: 1; grid-row: 2; width: 100%; height: 0; min-height: 100%; border-radius: 6px; object-fit: cover; object-position: 50% 25%; box-shadow: 0 0 0 1px #f3c77a40, 0 12px 32px #0008; }
+  .bio { grid-column: 2; grid-row: 2; columns: 2; column-gap: 40px; column-fill: balance; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+  header .bio p { margin: 0 0 12px; max-width: none; color: var(--ink); font-size: 15.5px; line-height: 1.6; text-wrap: pretty; }
+  header .bio p:last-child { margin-bottom: 0; }
+  .bio b { font-weight: 600; color: #fff8ea; }
+  .bio i { color: #e9dcc0; }
+  @media (max-width: 1100px) {
+    .bio { columns: 1; }
+    .me { height: auto; min-height: 0; aspect-ratio: 4 / 5; align-self: start; }
+  }
   .hint { font-size: 13px; color: var(--muted); }
   .hint b { color: var(--lamp); font-weight: 500; }
   body:not(:has(.gl)) .turn { display: none; }
@@ -35,22 +78,16 @@
   .pip { fill: var(--lamp); }
   .pip-ring { fill: none; stroke: var(--lamp); stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: ping 2.4s ease-out infinite; }
   @keyframes ping { 0% { transform: scale(1); opacity: .9 } 100% { transform: scale(3); opacity: 0 } }
-  #switch { cursor: pointer; outline: none; }
-  #switch:focus-visible .shade { stroke: var(--lamp); stroke-width: 4; }
   .view { position: relative; aspect-ratio: 4 / 3; }
   .view canvas { display: block; width: 100%; height: 100%; border-radius: 6px; }
   .gl .view > svg { display: none; }
-  #real { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
-  #real { opacity: 0; transition: opacity .9s ease; pointer-events: none; }
   .hotbtn { position: absolute; margin: 0; padding: 0; border: 0; background: none; border-radius: 8px; cursor: pointer; }
   .hotbtn:focus-visible, .hot.hotbtn:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
   .hotbtn.hot::before, .hotbtn.hot::after { content: ""; position: absolute; top: -6px; right: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--lamp); transition: opacity .3s; }
   .hotbtn.hot::after { box-sizing: border-box; background: none; border: 2px solid var(--lamp); animation: ping 2.4s ease-out infinite; }
-  .stage.lit .hotbtn::before, .stage.lit .hotbtn::after { opacity: 0; animation: none; }
-  .lit #real { opacity: 1; }
-  .lit .pip, .lit .pip-ring { opacity: 0; }
-  .caption { position: absolute; left: 40px; bottom: 16px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,.55); padding: 4px 10px; border-radius: 3px; opacity: 0; transition: opacity .6s .5s; pointer-events: none; }
-  .lit .caption { opacity: 1; }
+  .hotbtn.hot.star::before, .hotbtn.hot.star::after { top: -9px; right: -9px; width: 18px; height: 18px; }
+  .hotbtn.hot.star::before { background: #ffd98a; box-shadow: 0 0 14px 4px #f3c77aaa; }
+  .hotbtn.hot.star::after { border-width: 3px; animation-duration: 1.6s; }
   .steam { animation: steam 3.2s ease-out infinite; }
   @keyframes steam { 0% { transform: translateY(4px); opacity: 0 } 30% { opacity: .6 } 100% { transform: translateY(-14px); opacity: 0 } }
   .sway { animation: sway 5s ease-in-out infinite; }
@@ -58,6 +95,8 @@
   @keyframes sway { 0%, 100% { transform: rotate(-1.2deg) } 50% { transform: rotate(1.2deg) } }
   .swing { animation: swing 3.6s ease-in-out infinite; }
   @keyframes swing { 0%, 100% { transform: rotate(-3deg) } 50% { transform: rotate(3deg) } }
+  .hover { animation: hover 2.6s ease-in-out infinite; }
+  @keyframes hover { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
   .blink { animation: blink 4s linear infinite; }
   @keyframes blink { 0%, 78% { opacity: .35 } 82%, 88% { opacity: 1 } 85%, 92% { opacity: .35 } 100% { opacity: .35 } }
   .caret { animation: caret 1.1s steps(1) infinite; }
@@ -68,7 +107,7 @@
   @keyframes wag { 0%, 86%, 100% { transform: rotate(0) } 90% { transform: rotate(9deg) } 94% { transform: rotate(-6deg) } 97% { transform: rotate(5deg) } }
   .blades { animation: spin 2.4s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .pip-ring { animation: none; opacity: .5; } .blades, .steam, .sway, .swing, .blink, .caret, .rgb, .wag { animation: none; } #real { transition: none; } .hotbtn.hot::after { animation: none; opacity: .5; } }
+  @media (prefers-reduced-motion: reduce) { .pip-ring { animation: none; opacity: .5; } .blades, .steam, .sway, .swing, .blink, .caret, .rgb, .wag, .hover { animation: none; } .hotbtn.hot::after { animation: none; opacity: .5; } }
 
   .panel {
     position: absolute; top: 0; left: 0; width: 320px; background: #f4ecd9; color: #1d1a14;
@@ -91,18 +130,26 @@
   .plain h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 500; margin: 0 0 20px; }
   .plain ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 48px; }
   .plain li { padding: 20px 0; border-top: 1px solid var(--line); }
+  .honors { margin: 0 0 8px; padding-left: 18px; font-size: 15px; }
+  .plain .honors { color: #d6cfbf; }
+  .honors li, .plain .honors li { padding: 2px 0; border: 0; }
+  .honors li::marker { color: var(--lamp); }
   .plain h3 { font-family: "Young Serif", serif; font-weight: 400; font-size: 24px; margin: 0; }
   .plain .role { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--lamp); margin: 2px 0 8px; }
   .plain p { margin: 0 0 8px; color: #d6cfbf; font-size: 15px; }
+  .clip { display: block; width: 100%; height: auto; margin: 4px 0 12px; border-radius: 4px; background: #000; }
   .outside { margin: 32px 0 0; color: var(--muted); font-size: 14px; }
   footer { border-top: 1px solid var(--line); padding: 20px 24px; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
 
   @media (max-width: 860px) {
     header { padding: 24px 16px 4px; }
     header h1 { font-size: 32px; }
+    .who { grid-template-columns: 1fr; row-gap: 18px; }
+    .who h1 { grid-row: 2; }
+    .me { grid-row: 1; width: 150px; }
+    .bio { grid-column: 1; grid-row: 3; }
     .stage { padding: 12px 16px 0; }
-    .caption { left: 24px; bottom: 8px; }
-    .panel { position: fixed; left: 12px !important; right: 12px; bottom: 12px; top: auto !important; width: auto; transform: translateY(12px); }
+    .panel { position: fixed; left: 12px !important; right: 12px; bottom: 12px; top: auto !important; width: auto; max-height: calc(100dvh - 24px); overflow-y: auto; transform: translateY(12px); }
     .panel::before { display: none; }
     .plain { padding: 40px 16px 64px; }
     .plain ol { grid-template-columns: 1fr; }
@@ -112,11 +159,18 @@
 </head>
 <body>
 <header>
-  <div>
-    <h1>Sebastian “Seth” Donea</h1>
-    <p>This is my actual room in Evansville, Indiana. Most of what I'm working on is somewhere in it.</p>
+  <div class="who">
+    <img class="me" src="media/seth.jpg" width="480" height="600" alt="Seth presenting PageMD on stage at the STARTedUP Challenge">
+    <div class="intro">
+      <h1>Sebastian “Seth” Donea</h1>
+      <div class="bio">
+        <p>Hi, I’m Sebastian, but my friends call me <b>Seth</b> (and if you’ve read this far I’d consider us friends (<i>yes, the bar is that low</i>)). I’m currently a <b>Senior at Signature School</b> (we just ranked #2 again!!! <a href="https://www.usnews.com/education/best-high-schools/indiana/districts/signature-school-inc/signature-school-7098" target="_blank" rel="noopener">USNews</a>) in Evansville, IN. If you don’t know where that is, start by closing your eyes, then imagine the shape of Indiana, that sort of Y-like structure. Evansville is on that very bottom left tip. A beautiful place to fly over <i>on the way to somewhere more stimulating.</i></p>
+        <p>I’m interested in <b>Entrepreneurship and Finance</b>, particularly within the <b>Healthcare</b> space. I grew up in and around the hospital–<i>my mom’s a doctor</i>–meaning I’ve seen a lot of the issues and inefficiencies that plague the system. I would’ve probably gone into medicine myself if my friend Yuto hadn’t convinced me to try a pitch competition. <b>I fell in love with solving problems for the people I care about.</b> Seeing the look on someone’s face when you take a chip off their shoulder is a feeling I’ll always chase.</p>
+        <p>There’s more to my story, but now I’ll give you the opportunity (<i>you’re welcome</i>) to discover it yourself. Below, I’ve recreated <b>my actual room</b> in Evansville, Indiana. Most of what I'm working on is somewhere in it. As Dostoevsky said, <i>“Show me your room, and I will tell you exactly who you are.”</i> Look around, I’m sure you’ll find something interesting.</p>
+      </div>
+    </div>
   </div>
-  <div class="hint"><b>●</b> click anything that glows<span class="turn">, drag to turn the room</span>, or scroll for the plain version</div>
+  <div class="hint"><b>●</b> click anything that glows (the three brightest first)<span class="turn">, drag to turn the room</span>, or scroll for the plain version</div>
 </header>
 
 <div class="stage" id="stage">
@@ -466,9 +520,8 @@
   <path d="M558 808 q-12 -30 -6 -66 M558 808 q18 -30 40 -48 M558 808 q-24 -16 -42 -42" stroke="#3f7042" stroke-width="2" fill="none"/>
   </g>
 
-  <!-- floor lamp: the easter egg switch -->
-  <g id="switch" tabindex="0" role="button" aria-label="Turn on the lights" aria-pressed="false">
-    <rect x="470" y="580" width="110" height="262" fill="transparent"/>
+  <!-- floor lamp -->
+  <g>
     <line x1="522" y1="712" x2="522" y2="842" stroke="#b8b3a5" stroke-width="5"/>
     <polygon class="shade" points="492,604 554,604 562,714 484,714" fill="url(#shade)"/>
     <polygon points="492,604 506,604 498,714 484,714" fill="#ffe2a0" opacity=".7"/>
@@ -718,15 +771,27 @@
     <circle class="pip-ring" cx="490" cy="792" r="9"/><circle class="pip" cx="490" cy="792" r="9"/>
   </g>
 
+  <!-- drone hovering mid-room: Dove -->
+  <g class="hot" data-key="dove" tabindex="0" role="button" aria-label="Dove">
+    <rect class="glow" x="690" y="262" width="140" height="78" rx="8" fill="none" stroke="#f3c77a" stroke-width="4"/>
+    <g class="hover">
+      <path d="M718 290 L802 318 M802 290 L718 318" stroke="#26282b" stroke-width="5" stroke-linecap="round"/>
+      <g fill="#d8dcdf" opacity=".45"><ellipse cx="718" cy="286" rx="24" ry="4"/><ellipse cx="802" cy="286" rx="24" ry="4"/><ellipse cx="718" cy="314" rx="24" ry="4"/><ellipse cx="802" cy="314" rx="24" ry="4"/></g>
+      <g fill="#26282b"><rect x="713" y="286" width="10" height="8" rx="2"/><rect x="797" y="286" width="10" height="8" rx="2"/><rect x="713" y="314" width="10" height="8" rx="2"/><rect x="797" y="314" width="10" height="8" rx="2"/></g>
+      <rect x="742" y="294" width="36" height="22" rx="7" fill="#eeeae2"/>
+      <rect x="748" y="289" width="24" height="7" rx="2" fill="#26282b"/>
+      <circle cx="760" cy="320" r="5" fill="#26282b"/>
+      <circle cx="718" cy="324" r="2.5" fill="#7dff9a"/><circle cx="802" cy="324" r="2.5" fill="#ff5a4a"/>
+    </g>
+    <circle class="pip-ring" cx="826" cy="268" r="9"/><circle class="pip" cx="826" cy="268" r="9"/>
+  </g>
+
   <!-- finish: vignette + grain -->
   <rect width="1800" height="1350" fill="url(#vignette)" pointer-events="none"/>
   <rect width="1800" height="1350" filter="url(#grain)" opacity=".06" pointer-events="none"/>
 
 </svg>
-<!-- the real room, revealed by the lamp -->
-<img id="real" src="room/room-real.webp" alt="">
 </div>
-<div class="caption">lights on · the real room</div>
 
 <div class="panel" id="panel" role="dialog" aria-live="polite" aria-label="Details">
   <button type="button" aria-label="Close" id="close">×</button>
@@ -740,8 +805,11 @@
     <li id="pagemd">
       <h3>PageMD</h3>
       <div class="role">Founder · the pager on the nightstand</div>
+      <img class="clip" src="media/pagemd.jpg" width="640" height="336" alt="PageMD: conversational AI for clinical paging. Giving nurses their time back.">
       <p>An AI agent that triages inbound calls and pages on-call staff at outpatient clinics. My mom is a doctor and her pager kept interrupting dinner. Doctors can't be taken out of the loop, so we build for the nurses and staff on the other end.</p>
       <p>I lead a 3-person team; we're in beta at 2 clinics in Vanderburgh County. 1st at regionals, 3rd of 1,174 at the STARTedUP Challenge final, $5,500 in funding · <a href="https://pagemd.ai">pagemd.ai</a></p>
+      <img class="clip" src="media/pagemd-stage.jpg" width="640" height="612" loading="lazy" alt="Seth and his two PageMD teammates on stage at the STARTedUP Challenge, holding the prize check in front of the PageMD slide">
+
     </li>
     <li id="hh">
       <h3>Helping Hands</h3>
@@ -755,9 +823,44 @@
       <p>Pre-workout gummies. I built the store and a custom checkout myself, and it has taken live payments since August 2026.</p>
       <p><a href="https://lifefuel-web.vercel.app">lifefuel-web.vercel.app</a></p>
     </li>
+    <li id="dove">
+      <h3>Dove</h3>
+      <div class="role">Builder · the drone flying around the room</div>
+      <video class="clip" src="media/dove.mp4" poster="media/dove.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="Dove's 3D replays: a night flyover of the city, takeoff from the pad, following the subject in the red hoodie by day, searching after losing them at night with escape routes marked covered or open, and the thermal camera at night"></video>
+      <p>A drone that works as a police officer's sidekick: it keeps eyes on a subject so nobody goes in blind, and it decides nothing about people. Tell it "follow the person in the red hoodie" and it finds them with its own camera, follows from 20–30 m, searches when they duck behind a building, picks them back up, and flies home on command. No face recognition; it only knows people by what they're wearing.</p>
+      <p>Simulation only so far: a PX4 autopilot in Gazebo, YOLO tracking, and a safety supervisor that every command passes through. In the scored demo it found the target again 7 seconds after losing them, with zero safety violations. <a href="https://dove-kohl.vercel.app">dove-kohl.vercel.app</a></p>
+    </li>
+    <li id="honors">
+      <h3>Honors</h3>
+      <div class="role">The medals on the wall by the bed</div>
+      <ul class="honors">
+        <li>National Merit Scholarship Semifinalist</li>
+        <li>Morehead-Cain Nominee (1 of 2 school nominees)</li>
+        <li>Presidential Scholars Nominee (1 of 2 school nominees)</li>
+        <li>Rising Star of Indiana (1 of 4 juniors)</li>
+        <li>Lilly Endowment Community Scholarship Finalist (Vanderburgh County)</li>
+        <li>Romanian Heritage Awards National Laureate: Gold Award</li>
+        <li>STARTedUP Challenge, 3rd of 1,174 teams with PageMD</li>
+        <li>AP Capstone Diploma</li>
+      </ul>
+    </li>
+    <li id="holomap">
+      <h3>Holomap</h3>
+      <div class="role">Builder · the glowing chart above the bed</div>
+      <video class="clip" src="media/holomap.mp4" poster="media/holomap.jpg" width="640" height="360" muted loop playsinline preload="none" aria-label="Holomap: live ocean currents drift across a glowing holotable and a fuel-saving route is plotted through the Gulf Stream"></video>
+      <p>A straight line is the shortest way across the sea, but rarely the cheapest. Holomap pulls today's ocean currents, the 16-day wind forecast and live ship positions, draws them on a glowing tactical table, and plans the route that spends the least fuel.</p>
+      <p>Every day a GitHub Action runs the planner on 58 trips off the US East Coast and posts the biggest saving. <a href="https://holomap-eight.vercel.app">holomap-eight.vercel.app</a></p>
+    </li>
+    <li id="fielddex">
+      <h3>Field Dex</h3>
+      <div class="role">Builder · the cards on the bed</div>
+      <video class="clip" src="media/fielddex.mp4" poster="media/fielddex.jpg" width="640" height="400" muted loop playsinline preload="none" aria-label="Field Dex: a ZIP code is typed in and a grid of wildlife cards appears, rarest first, with a holographic Legendary card tilting under the pointer"></video>
+      <p>Enter a US ZIP code and every species people logged on iNaturalist within 10 km this week becomes a collectible card, rarest first. The dove on your feeder is Common; the fly someone photographed down the road might be one of a few hundred ever logged.</p>
+      <p>Every evening a GitHub Action posts the rarest find near Evansville. <a href="https://fielddex-delta.vercel.app">fielddex-delta.vercel.app</a></p>
+    </li>
     <li id="mentoring">
       <h3>Alumni Mentoring</h3>
-      <div class="role">Founder · Signature School</div>
+      <div class="role">Founder · Signature School · the pennant by the hutch</div>
       <p>My school had no alumni network, so I started one. I recruit mentors, match them with current students, and track check-ins. 22 pairs and about 100 mentoring hours so far.</p>
     </li>
     <li id="cvl">
@@ -787,17 +890,27 @@
     </li>
     <li id="tutoring">
       <h3>Tutoring</h3>
-      <div class="role">SAT &amp; AP Physics 1 · Elite Tutoring Place</div>
+      <div class="role">SAT &amp; AP Physics 1 · Elite Tutoring Place · the books on the gaming chair</div>
       <p>I diagnose gaps from practice tests, write study plans, and retest weekly. 9 students, average gain of 186 SAT points.</p>
     </li>
+    <li id="skate">
+      <h3>Skateboarding</h3>
+      <div class="role">Outside of work · the board on the floor</div>
+      <p>I skateboard two or three times a week if I have the time. I'm still learning. Landed my first pop shove-it recently.</p>
+    </li>
+    <li id="pingpong">
+      <h3>Table Tennis</h3>
+      <div class="role">Outside of work · the paddle on the floor</div>
+      <p>I love table tennis. Currently running a STIGA Cybershape Eclipse. HMU for a 1v1.</p>
+    </li>
   </ol>
-  <p class="outside">Outside of work: skateboarding, League of Legends, and ping-pong. I speak conversational Romanian and French.</p>
+  <p class="outside">Outside of work I also play League of Legends, and I speak conversational Romanian and French.</p>
 </section>
 
 
 <footer>
   <span>Sebastian “Seth” Donea · Signature School, class of 2027</span>
-  <span><a href="[TBD]">LinkedIn</a> · <a href="[TBD]">GitHub</a> · <a href="mailto:[TBD]">Email</a></span>
+  <span><a href="https://www.linkedin.com/in/sebastian-donea/">LinkedIn</a> · <a href="https://github.com/sdonea">GitHub</a> · <a href="mailto:sebdonea@gmail.com">Email</a> · <a href="resume.pdf">Résumé</a></span>
 </footer>
 
 <script type="importmap">
@@ -812,6 +925,15 @@
   const body = document.getElementById('panel-body');
   const view = document.getElementById('view');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // project clips loop silently while on screen; with reduced motion they hold their poster and get controls instead
+  const clipSeen = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? e.target.play().catch(() => {}) : e.target.pause()));
+  function clips(root) {
+    root.querySelectorAll('video.clip').forEach(v => {
+      v.muted = true;
+      if (reduced.matches) v.controls = true; else clipSeen.observe(v);
+    });
+  }
+  clips(document.querySelector('.plain'));
   let hots = []; // the clickable objects: SVG groups in the fallback, buttons over the canvas otherwise
   // the note pops out beside whatever was clicked, on whichever side has room
   function place(el) {
@@ -830,7 +952,9 @@
     panel.style.setProperty('--oy', ny + 7 + 'px');
   }
   function open(key, el) {
+    body.querySelectorAll('video.clip').forEach(v => clipSeen.unobserve(v));
     body.innerHTML = document.getElementById(key).innerHTML;
+    clips(body);
     hots.forEach(h => h.classList.toggle('on', h.dataset.key === key));
     panel.classList.remove('open');
     place(el);
@@ -847,18 +971,10 @@
   // ---------- fallback: the hand-drawn SVG ----------
   function svgRoom() {
     hots = view.querySelectorAll('svg .hot');
-    const lamp = document.getElementById('switch');
-    function toggleLights() {
-      const lit = stage.classList.toggle('lit');
-      lamp.setAttribute('aria-pressed', lit);
-      lamp.setAttribute('aria-label', lit ? 'Turn off the lights' : 'Turn on the lights');
-    }
     hots.forEach(h => {
       h.addEventListener('click', () => open(h.dataset.key, h));
       h.addEventListener('keydown', press(() => open(h.dataset.key, h)));
     });
-    lamp.addEventListener('click', toggleLights);
-    lamp.addEventListener('keydown', press(toggleLights));
     // clock shows real Evansville time
     function tick() {
       const [h, m] = chicago();
@@ -1337,6 +1453,21 @@
       g.computeVertexNormals();
       return g;
     }
+    // a bed pillow: a soft rectangle whose thickness falls off smoothly toward a seam all round, with no ridge along the
+    // diagonals (pillowGeo's max() taper creases there, which reads as a pyramid on something this plain)
+    function bedPillowGeo(w, h, d, seed = 1) {
+      const g = new THREE.SphereGeometry(1, 48, 32), p = g.attributes.position, uv = g.attributes.uv;
+      for (let i = 0; i < p.count; i++) {
+        const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+        const sx = Math.sign(x) * Math.abs(x) ** .35, sz = Math.sign(z) * Math.abs(z) ** .35;
+        uv.setXY(i, sx * w / 2 / .06, sz * d / 2 / .06);
+        const r = Math.min(1, (sx ** 4 + sz ** 4) ** .25), t = Math.sqrt(Math.max(0, 1 - r ** 5));
+        const dent = .05 * t * Math.sin(sx * 2.7 + seed) * Math.sin(sz * 2.1 - seed);
+        p.setXYZ(i, sx * w / 2, (Math.sign(y) * Math.abs(y) ** .7 * (.12 + .88 * t) + (y > 0 ? dent : 0)) * h / 2, sz * d / 2);
+      }
+      g.computeVertexNormals();
+      return g;
+    }
     const lathe = (pts, m, x, y, z, parent, seg = 40) => part(new THREE.LatheGeometry(pts.map(([a, b]) => new THREE.Vector2(a, b)), seg), m, x, y, z, parent);
     const plane = (w, h, m, x, y, z, parent) => part(new THREE.PlaneGeometry(w, h), m, x, y, z, parent);
     function grp(x = 0, y = 0, z = 0, parent = scene, ry = 0) {
@@ -1805,7 +1936,7 @@
       box(.1, .06, .008, std('#1a1a1a'), 0, .04, -.02, pg, .003);
     }
 
-    // floor lamp in the corner: the light switch for the easter egg
+    // floor lamp in the corner
     const lamp = grp(-1.2, 0, -1.9);
     {
       const baseM = shiny('#2a2826', { metalness: .6, roughness: .4 });
@@ -1933,7 +2064,7 @@
     const monitor = grp(1.62, GD_Y, -1.98);
     for (const s of [-1, 1]) box(.2, .012, .035, M.steel, s * .07, .006, .02, monitor, .006).rotation.y = s * .55;
     box(.05, .26, .03, M.steel, 0, .14, -.03, monitor, .01);
-    const bend = g => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - p.getX(i) ** 2 / 3.6); g.computeVertexNormals(); return g; };
+    const bend = g => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) + p.getX(i) ** 2 / 3.6); g.computeVertexNormals(); return g; };
     part(bend(new THREE.BoxGeometry(1.02, .37, .03, 48, 1, 1)), std('#1a1c1f', { roughness: .5 }), 0, .4, 0, monitor);
     box(.42, .22, .05, std('#1a1c1f', { roughness: .5 }), 0, .38, -.06, monitor, .02);
     // the screen emits light rather than reflecting it: unlit, so no highlight from the lamps in front of it
@@ -2117,8 +2248,8 @@
       // pillows: two leaning on the headboard, two lying in front, each a little rotated and dented differently
       const pillowM = fabric('#f7f5f0');
       for (const s of [-1, 1]) {
-        part(pillowGeo(.68, .2, .46, { square: .45, pinch: .85, seed: s + 2 }), pillowM, s * .4, .86, .27, bed).rotation.set(-1.1, s * .04, s * .03);
-        part(pillowGeo(.64, .17, .42, { square: .45, pinch: .85, seed: s * 3 }), pillowM, s * .37 + .03, .7, .57, bed).rotation.set(-.12, s * .1, s * -.03);
+        part(bedPillowGeo(.7, .15, .5, s + 2), pillowM, s * .39, .8, .3, bed).rotation.set(-1.15, s * .04, s * .02);
+        part(bedPillowGeo(.64, .13, .42, s * 3), pillowM, s * .36 + .02, .655, .63, bed).rotation.set(-.2, s * .08, s * -.02);
       }
     }
 
@@ -2344,7 +2475,7 @@
     door(DL, Z0 - T - .5, Math.PI / 2, .7, '#8b9196');
     door(DR, Z0 - T - .5, -Math.PI / 2, .7, '#7f858a');
 
-    // on the floor: boots and sneakers by the office chair, a backpack by the hall
+    // on the floor: boots and sneakers by the office chair
     {
       const bootM = std('#141414', { roughness: .45 }), shoeM = std('#f2f2f0', { roughness: .6 });
       for (const [x, z, r] of [[-1.05, -1.05, .3], [-.92, -1.12, .1]]) {
@@ -2357,9 +2488,6 @@
         box(.1, .07, .27, shoeM, 0, .035, 0, s, .03);
         box(.108, .02, .28, std('#bdbdb8'), 0, .01, 0, s, .008);
       }
-      const bp = grp(-.28, .0125, -1.45, scene, .6);
-      pb(bp, .2, std('#101316', { roughness: .7 }), 0, .1, 0, 1.2, .5, .8);
-      pb(bp, .12, std('#1d6b6a', { roughness: .6 }), .05, .12, .12, 1, .6, .5);
     }
 
     // ceiling fan
@@ -2380,6 +2508,157 @@
       box(.62, .012, .14, std('#43474b', { roughness: .5 }), .52, .006, 0, arm, .02).rotation.x = .1;
     }
 
+    // Dove: a little quadcopter circling the room below the fan. The flyer carries the path; the hotspot group inside it lifts
+    const doveFlyer = grp(.9, 1.85, 1.2);
+    doveFlyer.scale.setScalar(1.7);
+    const dove = grp(0, 0, 0, doveFlyer), rotors = [];
+    {
+      const shell = shiny('#eeeae2', { roughness: .4 }), dark = std('#26282b', { roughness: .5 });
+      box(.11, .036, .15, shell, 0, 0, 0, dove, .015);
+      box(.07, .016, .09, dark, 0, .025, -.015, dove, .006);
+      ball(.018, dark, 0, -.026, .062, dove, 12);
+      ball(.008, glow('#9ad8ff', 3), 0, -.026, .079, dove, 8);
+      for (const sx of [-1, 1]) {
+        rod(V(sx * .035, -.015, .03), V(sx * .05, -.062, .03), .004, dark, dove, 6);
+        rod(V(sx * .035, -.015, -.03), V(sx * .05, -.062, -.03), .004, dark, dove, 6);
+        box(.01, .01, .13, dark, sx * .05, -.064, 0, dove, .004);
+        for (const sz of [-1, 1]) {
+          const tip = V(sx * .14, .006, sz * .14);
+          rod(V(sx * .03, .004, sz * .045), tip, .007, dark, dove, 8);
+          cyl(.016, .016, .026, dark, tip.x, .018, tip.z, dove, 16);
+          ball(.006, glow(sz > 0 ? '#7dff9a' : '#ff5a4a', 4), tip.x, -.004, tip.z, dove, 8);
+          const r = grp(tip.x, .034, tip.z, dove);
+          box(.12, .003, .012, dark, 0, 0, 0, r, .001);
+          part(new THREE.CircleGeometry(.062, 32), std('#d8dcdf', { transparent: true, opacity: .16, depthWrite: false, side: THREE.DoubleSide }), 0, .001, 0, r).rotation.x = -Math.PI / 2;
+          rotors.push(r);
+        }
+      }
+      noShadow(doveFlyer);
+    }
+
+    // skateboard on the open floor by the dresser: a maple deck with kicked-up nose and tail, black grip, trucks, wheels
+    const skate = grp(1.5, 0, 1.3, scene, .5);
+    {
+      const deck = (h, inset = 0) => {
+        const g = new THREE.BoxGeometry(.8 - inset, h, .21 - inset, 40, 1, 6), p = g.attributes.position;
+        for (let i = 0; i < p.count; i++) {
+          const x = p.getX(i), ax = Math.abs(x), end = Math.max(0, ax - .295), kick = Math.max(0, ax - .24);
+          p.setZ(i, p.getZ(i) * Math.sqrt(Math.max(.02, 1 - (end / .105) ** 2)));
+          p.setY(i, p.getY(i) + kick * kick * 2.2);
+        }
+        g.computeVertexNormals();
+        return g;
+      };
+      part(deck(.014), std('#d4a46a', { roughness: .6 }), 0, .075, 0, skate);
+      part(deck(.002, .01), std('#1b1b1c', { roughness: .95 }), 0, .083, 0, skate);
+      const truckM = shiny('#b9bcc0', { metalness: .8, roughness: .35 }), wheelM = std('#efe6cf', { roughness: .5 });
+      for (const sx of [-.25, .25]) {
+        box(.06, .01, .05, truckM, sx, .064, 0, skate, .003);
+        box(.03, .028, .03, truckM, sx, .048, 0, skate, .006);
+        cyl(.007, .007, .17, truckM, sx, .03, 0, skate, 10).rotation.x = Math.PI / 2;
+        for (const sz of [-.075, .075]) cyl(.027, .027, .03, wheelM, sx, .027, sz, skate, 20).rotation.x = Math.PI / 2;
+      }
+    }
+
+    // ping-pong paddle dropped on the open floor, its ball rolled off a little way
+    const paddle = grp(.2, .0125, -.2, scene, 2.2);
+    paddle.scale.setScalar(1.3);
+    {
+      cyl(.075, .075, .004, std('#161616', { roughness: .8 }), 0, .002, 0, paddle, 36);
+      cyl(.077, .077, .006, M.wood, 0, .007, 0, paddle, 36);
+      cyl(.075, .075, .004, std('#c62b2b', { roughness: .75 }), 0, .012, 0, paddle, 36);
+      box(.1, .022, .03, M.woodTop, .118, .011, 0, paddle, .008);
+      ball(.02, std('#f6f2e8', { roughness: .4 }), -.04, .02, .12, paddle, 16);
+    }
+
+    // Field Dex: a fanned hand of wildlife cards on the bed, rarest on top
+    const cards = grp(-1.45, .675, 1.0, scene, .4);
+    [['#d9b23a', '#2f6b4a'], ['#8a5bd6', '#3c6f8f'], ['#3f7fd1', '#6f8f3c'], ['#4ea35a', '#8f6a3c'], ['#9a9a96', '#5a7d8f']].forEach(([rim, art], i) => {
+      const face = tex(100, 140, (g, w, h) => {
+        g.fillStyle = rim; g.beginPath(); g.roundRect(0, 0, w, h, 8); g.fill();
+        g.fillStyle = '#f4efe2'; g.fillRect(6, 6, w - 12, h - 12);
+        const grd = g.createLinearGradient(0, 14, 0, 76); grd.addColorStop(0, art); grd.addColorStop(1, '#1d2a24');
+        g.fillStyle = grd; g.fillRect(10, 14, w - 20, 62);
+        g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.ellipse(50, 50, 16, 10, -.3, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#2a2a28'; g.fillRect(12, 86, 60, 6); g.fillStyle = '#8a857a'; g.fillRect(12, 98, 76, 3); g.fillRect(12, 106, 64, 3);
+        g.fillStyle = rim; g.fillRect(12, 118, 34, 10);
+      });
+      const c = grp((i - 2) * .05, i * .003, Math.abs(i - 2) * .012, cards, (i - 2) * .22);
+      box(.1, .002, .14, std('#f4efe2', { roughness: .6 }), 0, 0, 0, c, .001);
+      plane(.098, .138, std('#fff', { map: face, roughness: .45 }), 0, .0012, 0, c).rotation.x = -Math.PI / 2;
+    });
+
+    // Holomap: a glowing chart of the Gulf Stream on the wall above the bed, a fuel-saving route traced through the current
+    const holoTex = tex(512, 340, (g, w, h) => {
+      g.fillStyle = '#04121c'; g.fillRect(0, 0, w, h);
+      g.strokeStyle = 'rgba(80,200,230,.12)'; g.lineWidth = 1;
+      for (let x = 0; x <= w; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+      for (let y = 0; y <= h; y += 32) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+      g.fillStyle = 'rgba(40,120,110,.55)'; g.strokeStyle = '#5fe0c8'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(0, 0); g.lineTo(150, 0); g.bezierCurveTo(170, 60, 120, 90, 130, 130); g.bezierCurveTo(140, 180, 90, 210, 80, 260); g.bezierCurveTo(70, 300, 40, 320, 30, h); g.lineTo(0, h); g.closePath(); g.fill(); g.stroke();
+      for (let k = 0; k < 14; k++) {
+        const o = k * 9 - 40;
+        g.strokeStyle = `rgba(110,220,255,${.18 + .5 * Math.exp(-((k - 6) ** 2) / 6)})`; g.lineWidth = 1.5;
+        g.beginPath(); g.moveTo(60 + o, h); g.bezierCurveTo(140 + o, 220, 160 + o, 140, 260 + o, 90); g.bezierCurveTo(330 + o, 55, 420 + o, 40, w, 20 + k * 3); g.stroke();
+      }
+      g.shadowColor = '#ffb24a'; g.shadowBlur = 12; g.strokeStyle = '#ffc46a'; g.lineWidth = 3; g.setLineDash([10, 6]);
+      g.beginPath(); g.moveTo(420, 60); g.bezierCurveTo(330, 70, 230, 120, 190, 190); g.bezierCurveTo(165, 235, 140, 262, 112, 280); g.stroke();
+      g.setLineDash([]); g.fillStyle = '#ffe2b0';
+      for (const [x, y] of [[420, 60], [112, 280]]) { g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill(); }
+      g.shadowBlur = 0; g.fillStyle = 'rgba(160,230,255,.8)'; g.font = '500 15px "IBM Plex Mono", monospace'; g.fillText('GULF STREAM · 12 KN', 300, 320);
+    });
+    const holomap = grp(X0, 1.75, 1.45, east.full, Math.PI / 2);
+    box(.74, .5, .03, std('#141618', { roughness: .4 }), 0, 0, .015, holomap, .008);
+    plane(.68, .44, glow('#ffffff', 1.15, { emissiveMap: holoTex, map: holoTex }), 0, 0, .031, holomap);
+
+    // Alumni Mentoring: a felt pennant tacked to the wall above the corner desk
+    const pennantTex = tex(512, 180, (g, w, h) => {
+      g.fillStyle = '#1e2f5a'; g.beginPath(); g.moveTo(0, 0); g.lineTo(w, h / 2); g.lineTo(0, h); g.closePath(); g.fill();
+      g.fillStyle = '#f2ead8'; g.fillRect(0, 0, 26, h);
+      g.font = '700 54px "Young Serif", Georgia, serif'; g.textBaseline = 'middle'; g.fillText('SIGNATURE', 48, h / 2 + 2);
+    });
+    const pennant = grp(-2.5, 1.6, Z0, scene);
+    plane(.66, .23, std('#ffffff', { map: pennantTex, alphaTest: .5, roughness: .95, side: THREE.DoubleSide }), .33, 0, .006, pennant);
+    ball(.009, M.brass, .02, 0, .012, pennant, 10);
+
+    // Tutoring: SAT and AP Physics prep books and a calculator left on the gaming chair seat
+    const satTex = tex(160, 200, (g, w, h) => {
+      g.fillStyle = '#1f4f9c'; g.fillRect(0, 0, w, h); g.fillStyle = '#fff'; g.font = '700 52px Helvetica, Arial, sans-serif'; g.fillText('SAT', 26, 92);
+      g.font = '500 20px Helvetica, Arial, sans-serif'; g.fillText('PRACTICE TESTS', 14, 130); g.fillStyle = '#f2c53d'; g.fillRect(14, 150, 132, 8);
+    });
+    const apTex = tex(160, 200, (g, w, h) => {
+      g.fillStyle = '#d4542b'; g.fillRect(0, 0, w, h); g.fillStyle = '#fff'; g.font = '700 40px Helvetica, Arial, sans-serif'; g.fillText('AP', 20, 70);
+      g.font = '600 24px Helvetica, Arial, sans-serif'; g.fillText('PHYSICS 1', 20, 108);
+    });
+    const tutor = grp(2.16, .565, -.88, scene, -1.1);
+    {
+      const b1 = grp(0, 0, 0, tutor, .1), b2 = grp(.012, .03, -.01, tutor, -.25);
+      box(.17, .028, .22, std('#1f4f9c', { roughness: .6 }), 0, .014, 0, b1, .005);
+      plane(.16, .21, std('#fff', { map: satTex, roughness: .6 }), 0, .0285, 0, b1).rotation.x = -Math.PI / 2;
+      box(.16, .024, .21, std('#d4542b', { roughness: .6 }), 0, .012, 0, b2, .005);
+      plane(.15, .2, std('#fff', { map: apTex, roughness: .6 }), 0, .0245, 0, b2).rotation.x = -Math.PI / 2;
+      const calc = grp(.02, .055, .03, tutor, .5);
+      box(.07, .012, .14, std('#2a2d33', { roughness: .5 }), 0, .006, 0, calc, .006);
+      box(.05, .002, .03, glow('#9fc79a', .6), 0, .013, -.045, calc, .001);
+    }
+
+    // Honors: a shadow box of medals on the east wall by the front nightstand
+    const honors = grp(X0, 1.62, 2.12, east.full, Math.PI / 2);
+    {
+      const frameM = std('#2a1a10', { roughness: .45 }), backM = std('#1d2a44', { roughness: .95 });
+      box(.56, .44, .02, backM, 0, 0, .01, honors, .004);
+      for (const [w, h, x, y] of [[.6, .03, 0, .22], [.6, .03, 0, -.22], [.03, .44, -.285, 0], [.03, .44, .285, 0]]) box(w, h, .06, frameM, x, y, .03, honors, .008);
+      const gold = shiny('#d9b04a', { metalness: .9, roughness: .3 }), silver = shiny('#c9ccd1', { metalness: .9, roughness: .28 });
+      [[-.16, '#b8342a', gold], [0, '#2f5fb0', gold], [.16, '#e3c24b', silver]].forEach(([x, rib, m]) => {
+        const rm = std(rib, { roughness: .8 });
+        for (const s of [-1, 1]) box(.022, .1, .004, rm, x + s * .013, .1, .024, honors, .002).rotation.z = s * .22;
+        cyl(.036, .036, .008, m, x, .02, .026, honors, 28).rotation.x = Math.PI / 2;
+        cyl(.024, .024, .009, m === gold ? shiny('#b08a32', { metalness: .9, roughness: .4 }) : shiny('#a3a6ab', { metalness: .9, roughness: .4 }), x, .02, .027, honors, 24).rotation.x = Math.PI / 2;
+      });
+      for (const x of [-.16, 0, .16]) box(.11, .035, .006, M.brass, x, -.13, .023, honors, .002);
+      box(.4, .05, .006, std('#f2ead8', { roughness: .8 }), 0, -.065, .022, honors, .002);
+    }
+
     // ----- light -----
     // evening: the lamps are the warm key; the cool fill is the night sky through the north window, a soft blue wash
     // across the room and a moonlit patch on the floor below the sill
@@ -2398,7 +2677,6 @@
 
     // ----- camera, post -----
     const HOME = { pos: V(1.5, 5.4, 11), target: V(-.05, .8, .15), fov: 34 };
-    const PHOTO = { pos: V(.1, 1.4, 3.9), target: V(.1, 1.05, -2.2), fov: 54 };
     const cam = { pos: HOME.pos.clone(), target: HOME.target.clone(), fov: HOME.fov };
     const camera = new THREE.PerspectiveCamera(HOME.fov, 4 / 3, .05, 60);
     // only the scene itself is multisampled: it renders into its own MSAA target, and the post passes work on the
@@ -2461,8 +2739,8 @@
       for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) corners.push(V(x, y, z));
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = key === 'lamp' ? 'hotbtn lampbtn' : 'hot hotbtn';
-      if (key !== 'lamp') btn.dataset.key = key;
+      btn.className = 'hot hotbtn';
+      btn.dataset.key = key;
       btn.setAttribute('aria-label', label);
       for (const ev of ['pointerenter', 'pointerleave', 'focus', 'blur']) btn.addEventListener(ev, invalidate);
       spots.push({ key, group, lift, mats, corners, btn, base: group.position.clone(), k: 0, rect: '' });
@@ -2470,11 +2748,8 @@
     }
     const svgLabel = k => view.querySelector(`svg .hot[data-key="${k}"]`).getAttribute('aria-label');
     const up = V(0, .03, 0), out = V(0, 0, .025);
-    const lampBtn = spot('lamp', lamp, V(0, .02, 0), 'Turn on the lights');
-    lampBtn.setAttribute('aria-pressed', 'false');
     const buttons = {
       ee: spot('ee', books, up, svgLabel('ee')),
-      lamp: lampBtn,
       yg: spot('yg', ribbons, out, svgLabel('yg')),
       hh: spot('hh', trophy, up, svgLabel('hh')),
       now: spot('now', monitor, V(0, .02, .02), svgLabel('now')),
@@ -2482,13 +2757,26 @@
       cvl: spot('cvl', lanyard, out, svgLabel('cvl')),
       send: spot('send', jar, up, svgLabel('send')),
       pagemd: spot('pagemd', pager, up, svgLabel('pagemd')),
+      dove: spot('dove', dove, V(0, .03, 0), svgLabel('dove')),
+      holomap: spot('holomap', holomap, V(.025, 0, 0), 'Holomap'),
+      fielddex: spot('fielddex', cards, up, 'Field Dex'),
+      skate: spot('skate', skate, up, 'Skateboarding'),
+      pingpong: spot('pingpong', paddle, up, 'Table Tennis'),
+      mentoring: spot('mentoring', pennant, out, 'Alumni Mentoring'),
+      tutoring: spot('tutoring', tutor, up, 'Tutoring'),
+      honors: spot('honors', honors, V(.025, 0, 0), 'Honors'),
     };
+    // start here: the three strongest stories get the brightest dots
+    for (const k of ['pagemd', 'dove', 'now']) buttons[k].classList.add('star');
     view.append(...Object.values(buttons));
+    // the drone's hotspot box rides along with it: keep its corners in the drone's own frame
+    const doveSpot = spots.find(s => s.key === 'dove');
+    doveSpot.local = doveSpot.corners.map(c => dove.worldToLocal(c.clone()));
 
     // everything that never moves is merged per material, so the detail costs vertices, not draw calls. Things that do
     // move (hotspots, walls that swap, the fan, the clock hands) are merged the same way inside their own group.
     {
-      const moving = new Set([...spots.map(s => s.group), ...sides.flatMap(s => [s.full, s.stub]), blades, lanyard, tail, fleaves, dleaves, hourHand, minHand]);
+      const moving = new Set([...spots.map(s => s.group), ...sides.flatMap(s => [s.full, s.stub]), blades, ...rotors, lanyard, tail, fleaves, dleaves, hourHand, minHand]);
       const buckets = new Map(), inv = new THREE.Matrix4(), animated = new Set([M.rgb, ...spots.flatMap(s => s.mats)]);
       // materials that differ only in colour become one material with the colour carried per vertex
       const proxy = m => {
@@ -2521,7 +2809,7 @@
         list.forEach(o => o.removeFromParent());
       }
     }
-    hots = spots.filter(s => s.key !== 'lamp').map(s => s.btn);
+    hots = spots.map(s => s.btn);
     hots.forEach(b => b.addEventListener('click', () => open(b.dataset.key, b)));
     document.addEventListener('click', invalidate);
     document.addEventListener('keydown', invalidate);
@@ -2529,6 +2817,8 @@
     const pv = new THREE.Vector3(), right = new THREE.Vector3(), upv = new THREE.Vector3();
     function project() {
       const w = view.clientWidth, h = view.clientHeight;
+      doveFlyer.updateMatrixWorld(true);
+      doveSpot.corners.forEach((c, i) => c.copy(doveSpot.local[i]).applyMatrix4(dove.matrixWorld));
       const boxes = spots.map(s => {
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
         for (const c of s.corners) {
@@ -2559,35 +2849,13 @@
       });
     }
 
-    // ----- lamp easter egg: fly to the photo's vantage point, then crossfade to the real room -----
-    let lit = false, flight = null;
-    function flyTo(to, delay, done) {
-      flight = { from: { pos: cam.pos.clone(), target: cam.target.clone(), fov: cam.fov }, to, t0: performance.now() + delay, done };
-    }
-    function setCam(to) { cam.pos.copy(to.pos); cam.target.copy(to.target); cam.fov = to.fov; }
-    lampBtn.addEventListener('click', () => {
-      // bake any drag into the camera so the flight starts from where the room is actually being viewed
-      cam.pos.sub(cam.target).applyAxisAngle(Y, orbit.az).add(cam.target);
-      orbit.az = orbit.want = 0; orbit.drag = null;
-      lit = !lit;
-      lampBtn.setAttribute('aria-pressed', lit);
-      lampBtn.setAttribute('aria-label', lit ? 'Turn off the lights' : 'Turn on the lights');
-      if (!motion()) {
-        flight = null;
-        setCam(lit ? PHOTO : HOME);
-        stage.classList.toggle('lit', lit);
-      } else if (lit) flyTo(PHOTO, 0, () => stage.classList.add('lit'));
-      else { stage.classList.remove('lit'); flyTo(HOME, 650); }
-      invalidate();
-    });
-
     // ----- drag to turn the room, horizontally only; vertical swipes still scroll the page -----
     const Y = V(0, 1, 0), orbit = { az: 0, want: 0, drag: null };
     const AZ = 92 * deg, baseAz = Math.atan2(HOME.pos.x - HOME.target.x, HOME.pos.z - HOME.target.z);
     canvas.style.touchAction = 'pan-y';
     canvas.style.cursor = 'grab';
     canvas.addEventListener('pointerdown', e => {
-      if (lit || flight || e.button) return;
+      if (e.button) return;
       orbit.drag = { x: e.clientX, az: orbit.want };
       canvas.setPointerCapture(e.pointerId);
       canvas.style.cursor = 'grabbing';
@@ -2622,9 +2890,22 @@
     const keyframes = (t, ks) => { for (let i = 1; i < ks.length; i++) if (t <= ks[i][0]) { const [t0, v0] = ks[i - 1], [t1, v1] = ks[i]; return v0 + (v1 - v0) * (t - t0) / (t1 - t0); } return 0; };
     const plantsBase = [fleaves.rotation.clone(), dleaves.rotation.clone()];
 
+    // the drone loops an oval under the fan, banking into the turn. It keeps flying with its card open; the card stays where it opened
+    const fly = { a: 0, last: 0 };
+    function flyDove(now) {
+      const dt = Math.min(.05, (now - fly.last) / 1000);
+      fly.last = now;
+      fly.a += dt * Math.PI * 2 / 28;
+      const a = fly.a, vx = 1.45 * Math.cos(a), vz = -1.15 * Math.sin(a);
+      doveFlyer.position.set(1.45 * Math.sin(a), 1.85 + .07 * Math.sin(3 * a) + .012 * Math.sin(now / 270), .4 + 1.15 * Math.cos(a));
+      doveFlyer.rotation.set(.14, Math.atan2(vx, vz), -.16, 'YXZ');
+      rotors.forEach((r, i) => { r.rotation.y = now / 1000 * 45 * (i % 2 ? 1 : -1); });
+    }
+
     function animate(now) {
       const t = now / 1000, TAU = Math.PI * 2;
       blades.rotation.y = -t * TAU / 2.4;
+      flyDove(now);
       steam.forEach((s, i) => {
         const p = (t / 3.2 + i / 3) % 1;
         s.position.y = DESK_Y + .1 + p * .16;
@@ -2650,6 +2931,7 @@
       pcLight.intensity = .4;
       M.rgb.emissiveIntensity = 2.4;
       ledM.emissiveIntensity = 1;
+      doveFlyer.position.set(.9, 1.85, 1.2); doveFlyer.rotation.set(0, -.6, 0);
       drawScreen(...NODES[3], -1, true);
     }
 
@@ -2658,7 +2940,7 @@
     function paceCheck(now) {
       const dt = now - pace.last;
       pace.last = now;
-      if (dt > 100 || flight) return;
+      if (dt > 100) return;
       pace.sum += dt;
       if (++pace.n < 45) return;
       if (pace.sum / pace.n > 19 && pr > 1) {
@@ -2674,16 +2956,8 @@
       const now = performance.now(), moving = motion();
       if (looping) paceCheck(now);
       if (moving) animate(now);
-      if (flight) {
-        const p = Math.max(0, Math.min(1, (now - flight.t0) / 1400)), e = p < .5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2;
-        cam.pos.lerpVectors(flight.from.pos, flight.to.pos, e);
-        cam.target.lerpVectors(flight.from.target, flight.to.target, e);
-        cam.fov = flight.from.fov + (flight.to.fov - flight.from.fov) * e;
-        if (p === 1) { const done = flight.done; flight = null; done?.(); }
-      }
       // parallax: drift a few degrees toward the pointer, only at home
-      par.k += ((moving && !lit && !flight ? 1 : 0) - par.k) * (moving ? .06 : 1);
-      tilt.uniforms.amount.value = Math.min(1, cam.pos.distanceTo(PHOTO.pos) / 2);
+      par.k += ((moving ? 1 : 0) - par.k) * (moving ? .06 : 1);
       par.x += (ptr.x - par.x) * .05; par.y += (ptr.y - par.y) * .05;
       orbit.az += (orbit.want - orbit.az) * (moving ? .14 : 1);
       if (Math.abs(orbit.want - orbit.az) < 1e-4) orbit.az = orbit.want;
@@ -2698,7 +2972,7 @@
       fill.position.copy(camera.position); fill.target.position.copy(cam.target);
       fill.intensity = .15 + .75 * Math.min(1, Math.abs(orbit.az) / (60 * deg));
       for (const s of sides) { const cut = s.outside(camera.position); s.full.visible = !cut; s.stub.visible = cut; }
-      let settling = !!flight || orbit.az !== orbit.want;
+      let settling = orbit.az !== orbit.want;
       for (const s of spots) {
         const want = s.btn.matches(':hover') || s.btn.matches(':focus-visible') || s.btn.classList.contains('on') ? 1 : 0;
         const k0 = s.k;
