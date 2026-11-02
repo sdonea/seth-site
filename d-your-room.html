@@ -1043,6 +1043,15 @@
   }
 
   // ---------- the 3D room ----------
+  // the room builds in slices so it never holds the main thread for long: the plain version below stays scrollable,
+  // its clips play and its lazy video loads while the room is still coming up. Nobody's waiting in a hidden tab, so no slices there.
+  let sliceAt = performance.now();
+  async function breathe() {
+    if (document.hidden || performance.now() - sliceAt < 24) return;
+    await new Promise(r => setTimeout(r));
+    sliceAt = performance.now();
+  }
+
   async function glRoom() {
     const [THREE, { RoundedBoxGeometry }, { EffectComposer }, { TexturePass }, { UnrealBloomPass }, { OutputPass }, { RoomEnvironment }, { GTAOPass }, { mergeGeometries }] = await Promise.all([
       import('three'),
@@ -1084,6 +1093,7 @@
     }
     const env = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), .04).texture;
 
+    await breathe();
     // ----- procedural textures -----
     const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     function tex(w, h, draw, repeat) {
@@ -1107,16 +1117,17 @@
       };
     }
     // fill a canvas pixel by pixel: f(u, v) returns a grey level, or [r, g, b], in 0..1
-    function pix(w, h, f, repeat) {
-      return tex(w, h, g => {
-        const img = g.createImageData(w, h), d = img.data;
-        for (let y = 0, i = 0; y < h; y++) for (let x = 0; x < w; x++, i += 4) {
+    async function pix(w, h, f, repeat) {
+      const img = new ImageData(w, h), d = img.data;
+      for (let y = 0, i = 0; y < h; y++) {
+        for (let x = 0; x < w; x++, i += 4) {
           const c = f(x / w, y / h, x, y);
           const [r, gg, b] = typeof c === 'number' ? [c, c, c] : c;
           d[i] = r * 255; d[i + 1] = gg * 255; d[i + 2] = b * 255; d[i + 3] = 255;
         }
-        g.putImageData(img, 0, 0);
-      }, repeat);
+        await breathe();
+      }
+      return tex(w, h, g => g.putImageData(img, 0, 0), repeat);
     }
     const smooth = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
     // wood: growth rings pulled along the grain by a slow warp, latewood lines, fibres and pores. Neutral, so one
@@ -1128,8 +1139,8 @@
       const fibre = wn3(u * 320, v * 24 + off * 7), pore = fibre > .82 ? (fibre - .82) * 1.2 : 0;
       return .88 + wn1(u * 6, v * 2 + 3) * .07 - late * .15 - fibre * .07 - pore;
     }
-    const grainTex = pix(512, 1024, (u, v) => { const l = woodAt(u, v); return [l, l * .97, l * .93]; }, [1, 1]);
-    const floorTex = pix(1024, 1024, (u, v, x, y) => {
+    const grainTex = await pix(512, 1024, (u, v) => { const l = woodAt(u, v); return [l, l * .97, l * .93]; }, [1, 1]);
+    const floorTex = await pix(1024, 1024, (u, v, x, y) => {
       // eight rows of planks, staggered; each plank takes its own slice of grain, its own shade, and a dark seam
       const cols = 8, c = Math.floor(u * cols);
       const stagger = ((c * 0.37) % 1), vv = (v + stagger) % 1, id = c * 7;
@@ -1141,16 +1152,16 @@
     }, [4, 3]);
     // painted drywall: slow mottling in the value and a fine orange-peel texture, all within a few percent of white
     const pn1 = vnoise(5), pn2 = vnoise(160);
-    const wallTex = pix(512, 512, (u, v) => .955 + pn1(u * 5, v * 5) * .035 + pn2(u * 160, v * 160) * .012 - (pn2(u * 160 + 40, v * 160) > .86 ? .02 : 0), [1, 1]);
+    const wallTex = await pix(512, 512, (u, v) => .955 + pn1(u * 5, v * 5) * .035 + pn2(u * 160, v * 160) * .012 - (pn2(u * 160 + 40, v * 160) > .86 ? .02 : 0), [1, 1]);
     // plain weave: threads alternating over and under, with a little slub so it's not a perfect grid
     const fn1 = vnoise(32);
-    const weaveTex = pix(256, 256, (u, v) => {
+    const weaveTex = await pix(256, 256, (u, v) => {
       const x = u * 64, y = v * 64, over = (Math.floor(x) + Math.floor(y)) % 2, t = over ? x % 1 : y % 1;
       return .84 + Math.sin(t * Math.PI) * .14 + fn1(u * 32, v * 32) * .04 - .02;
     }, [1, 1]);
     // pebbled leather: soft cells with creased valleys
     const ln1 = vnoise(48), ln2 = vnoise(96);
-    const leatherTex = pix(256, 256, (u, v) => { const n = Math.abs(ln1(u * 48, v * 48) - .5) * 2, m = Math.abs(ln2(u * 96, v * 96) - .5) * 2; return .55 + Math.min(n, m) * .45; }, [1, 1]);
+    const leatherTex = await pix(256, 256, (u, v) => { const n = Math.abs(ln1(u * 48, v * 48) - .5) * 2, m = Math.abs(ln2(u * 96, v * 96) - .5) * 2; return .55 + Math.min(n, m) * .45; }, [1, 1]);
     grainTex.userData.tile = .8; wallTex.userData.tile = 1.6; weaveTex.userData.tile = .06; leatherTex.userData.tile = .08;
     const rugTex = tex(1024, 716, (g, w, h) => {
       g.fillStyle = '#34433e'; g.fillRect(0, 0, w, h);
@@ -1268,6 +1279,7 @@
       g.fillStyle = r; g.fillRect(0, 0, 64, 64);
     });
 
+    await breathe();
     // the view out: deep blue sky with stars, a crescent moon, and the roofline across the street with two lit windows
     const nightTex = tex(256, 512, (g, w, h) => {
       const r = g.createLinearGradient(0, 0, 0, h);
@@ -1283,9 +1295,10 @@
       g.beginPath(); g.moveTo(0, 400); g.lineTo(60, 360); g.lineTo(120, 400); g.lineTo(150, 400); g.lineTo(150, 380); g.lineTo(256, 380); g.lineTo(256, h); g.lineTo(0, h); g.fill();
       for (const [x, y] of [[30, 430], [190, 420]]) { g.fillStyle = 'rgba(243,199,122,.8)'; g.fillRect(x, y, 16, 20); g.fillStyle = 'rgba(243,199,122,.15)'; g.fillRect(x - 6, y - 6, 28, 32); }
     });
+    await breathe();
     // duvet cover: white cotton with a faint weave and slow value drift, navy piping inset along the sides and the foot
     const dn = vnoise(6), dw = vnoise(128);
-    const duvetTex = pix(512, 512, (u, v, x, y) => {
+    const duvetTex = await pix(512, 512, (u, v, x, y) => {
       const inset = Math.min(Math.abs(x - 84), Math.abs(x - 428), Math.abs(y - 440));
       if (inset < 2.2 && y < 441 && x > 83 && x < 429) return [.2, .27, .63];
       const l = .95 + dn(u * 6, v * 6) * .04 + dw(u * 128, v * 128) * .02 - .02;
@@ -1330,6 +1343,7 @@
       for (let x = 10; x < w; x += 22 + rnd() * 10) { g.beginPath(); g.moveTo(x, 0); g.quadraticCurveTo(x + 14, h * .3, x + 2, h * .55); g.lineTo(x + 7, h * .5); g.quadraticCurveTo(x + 18, h * .25, x + 8, 0); g.fill(); }
     });
 
+    await breathe();
     // the monitor: a knowledge graph with a query dot hopping node to node
     const scr = document.createElement('canvas');
     scr.width = 1024; scr.height = 348;
@@ -1370,6 +1384,7 @@
     }
     drawScreen(...NODES[3], -1, true);
 
+    await breathe();
     // ----- materials + modelling helpers -----
     // edge wear: box bevels carry a 'wear' attribute (1 on the rounded edge), which lifts and polishes the colour there,
     // the way paint and stain rub thin where hands and feet touch. One patch, shared by every material.
@@ -1473,6 +1488,7 @@
       return part(g, m, x, y, z, parent);
     }
     const ball = (r, m, x, y, z, parent, seg = r < .015 ? 10 : r < .05 ? 16 : 24) => part(new THREE.SphereGeometry(r, seg, Math.ceil(seg * .7)), m, x, y, z, parent);
+    await breathe();
     // a stuffed form: a squarish slab whose thickness pinches to a seam at its edges, with soft creases across the top.
     // Pillows, cushions, the fold of the duvet and the chair rolls are all this, so every soft thing shares one language.
     function pillowGeo(w, h, d, { square = .3, pinch = .78, crease = .1, seed = 1 } = {}) {
@@ -1572,6 +1588,7 @@
       cyl(.065, .07, .045, legM, 0, .1, 0, parent, 24);
     }
 
+    await breathe();
     // ----- the room shell: a cutaway diorama on a plinth -----
     const X0 = -3, X1 = 3, Z0 = -2.2, Z1 = 2.9, ZC = (Z0 + Z1) / 2, H = 2.7, T = .14;
     const DL = -.95, DR = .25, DH = 2.3, HALL = 1, ZD = Z0 - T - HALL;
@@ -1620,6 +1637,7 @@
     box(X1 - X0, .07, .05, M.trim, 0, H - .035, Z1 - .025, north.full);
     box(X1 - X0, .03, .028, M.trim, 0, H - .085, Z1 - .014, north.full);
 
+    await breathe();
     // the window wall: the wall is four pieces around the opening, then the frame, a rolled shade and the curtains
     const WX0 = -.45, WX1 = .85, WY0 = .9, WY1 = 2.15, WX = (WX0 + WX1) / 2, WW = WX1 - WX0;
     {
@@ -1699,6 +1717,7 @@
     cyl(.045, .05, .012, std('#d8d2c2'), 0, 0, .034, smoke, 40).rotation.x = Math.PI / 2;
     ball(.006, glow('#6fcf7a', 4), .035, -.03, .03, smoke, 10);
 
+    await breathe();
     // the clock: real America/Chicago time
     const clock = grp(.88, 1.72, Z0);
     part(new THREE.TorusGeometry(.165, .018, 12, 48), M.black, 0, 0, .02, clock);
@@ -1740,6 +1759,7 @@
       for (const [dx, dy, r] of [[-1, 1, -.35], [1, 1, .35]]) box(.05, .02, .002, tapeM, x + dx * (w / 2 - .01), y + dy * (h / 2 - .005), Z0 + .0045, scene, .001).rotation.z = r + i * .05;
     });
 
+    await breathe();
     // ----- hutch desk against the left wall -----
     const HX = X0, HZ0 = Z0, HZ1 = -.55;
     const innerM = std('#6a4630', { map: grainTex, roughness: .7, emissive: '#5a3418', emissiveIntensity: .35 });
@@ -1836,6 +1856,7 @@
     for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; box(.004, .028, .004, std('#c93c00'), Math.cos(a) * .056, .137, Math.sin(a) * .056, jar, .001); }
     part(new THREE.TorusGeometry(.052, .004, 6, 40), std('#c93c00'), 0, .12, 0, jar).rotation.x = Math.PI / 2;
 
+    await breathe();
     // plushies on top of the hutch: toy proportions, big heads, glossy button eyes, fuzzy fabric
     {
       const gloss = std('#0c0c0e', { roughness: .12, envMap: env, envMapIntensity: .9 });
@@ -1900,6 +1921,7 @@
       }
     }
 
+    await breathe();
     // L-return along the back wall, with a curved front edge
     {
       const s = new THREE.Shape();
@@ -1971,6 +1993,7 @@
       box(.1, .06, .008, std('#1a1a1a'), 0, .04, -.02, pg, .003);
     }
 
+    await breathe();
     // floor lamp in the corner
     const lamp = grp(-1.2, 0, -1.9);
     {
@@ -2041,6 +2064,7 @@
       }
     }
 
+    await breathe();
     // ----- the gaming side -----
     // floor plant by the doorway
     const fplant = grp(.55, 0, -1.92);
@@ -2107,6 +2131,7 @@
     box(.34, .022, .03, M.steel, 0, .597, .004, monitor, .008);
     noShadow(box(.3, .004, .008, glow('#ffe2b0', 2.2), 0, .586, .012, monitor, .002));
 
+    await breathe();
     // tower with pulsing RGB fans
     const pc = grp(2.32, GD_Y, -1.92);
     box(.22, .46, .44, std('#111214', { roughness: .45 }), 0, .23, 0, pc, .018);
@@ -2155,6 +2180,7 @@
       cyl(.004, .004, .03, M.gold, 0, .295, 0, trophy, 8);
     }
 
+    await breathe();
     // gaming chair, black and red, turned out toward the room: bolstered bucket seat, winged back, pillows
     {
       const gc = grp(2.2, 0, -.9, scene, -1.1);
@@ -2226,6 +2252,7 @@
       });
     }
 
+    await breathe();
     // ----- the sleeping side, from the photos: bed on the east wall, dresser and TV stand on the west -----
 
     const gloss = std('#0c0c0e', { roughness: .12, envMap: env, envMapIntensity: .9 });
@@ -2301,6 +2328,7 @@
       return n;
     }
     const nsR = nightstand(-.03), nsL = nightstand(2.32);
+    await breathe();
     // right: octopus plush, water bottle, Echo Show, remotes, a paperback
     {
       const TOP = .655, n = nsR;
@@ -2362,6 +2390,7 @@
     // subwoofer tucked between the hutch and the nightstand
     box(.28, .34, .24, std('#18181a', { roughness: .6 }), X0 + .18, .17, -.43, scene, .015);
 
+    await breathe();
     // dresser in the far corner of the west wall, arched mirror, and the plush collection on top
     const DZ = 1.52, DTOP = .88;
     const dresser = grp(X1 - .25, 0, DZ, scene, -Math.PI / 2);
@@ -2461,6 +2490,7 @@
       });
     }
 
+    await breathe();
     // TV stand: black glass shelves between curved wood ends; a soundbar, a laptop, a lightsaber, Lego sets, a receiver
     const tvs = grp(X1 - .25, 0, .05, scene, -Math.PI / 2);
     {
@@ -2510,6 +2540,7 @@
     door(DL, Z0 - T - .5, Math.PI / 2, .7, '#8b9196');
     door(DR, Z0 - T - .5, -Math.PI / 2, .7, '#7f858a');
 
+    await breathe();
     // on the floor: boots and sneakers by the office chair
     {
       const bootM = std('#141414', { roughness: .45 }), shoeM = std('#f2f2f0', { roughness: .6 });
@@ -2543,6 +2574,7 @@
       box(.62, .012, .14, std('#43474b', { roughness: .5 }), .52, .006, 0, arm, .02).rotation.x = .1;
     }
 
+    await breathe();
     // Dove: a little quadcopter circling the room below the fan. The flyer carries the path; the hotspot group inside it lifts
     const doveFlyer = grp(.9, 1.85, 1.2);
     doveFlyer.scale.setScalar(1.7);
@@ -2606,6 +2638,7 @@
       ball(.02, std('#f6f2e8', { roughness: .4 }), -.04, .02, .12, paddle, 16);
     }
 
+    await breathe();
     // Field Dex: a fanned hand of wildlife cards on the bed, rarest on top
     const cards = grp(-1.45, .675, 1.0, scene, .4);
     [['#d9b23a', '#2f6b4a'], ['#8a5bd6', '#3c6f8f'], ['#3f7fd1', '#6f8f3c'], ['#4ea35a', '#8f6a3c'], ['#9a9a96', '#5a7d8f']].forEach(([rim, art], i) => {
@@ -2646,6 +2679,7 @@
     box(.74, .5, .03, std('#141618', { roughness: .4 }), 0, 0, .015, holomap, .008);
     plane(.68, .44, glow('#ffffff', 1.15, { emissiveMap: holoTex, map: holoTex }), 0, 0, .031, holomap);
 
+    await breathe();
     // Alumni Mentoring: a felt pennant tacked to the wall above the corner desk
     const pennantTex = tex(512, 180, (g, w, h) => {
       g.fillStyle = '#1e2f5a'; g.beginPath(); g.moveTo(0, 0); g.lineTo(w, h / 2); g.lineTo(0, h); g.closePath(); g.fill();
@@ -2694,6 +2728,7 @@
       box(.4, .05, .006, std('#f2ead8', { roughness: .8 }), 0, -.065, .022, honors, .002);
     }
 
+    await breathe();
     // ----- light -----
     // evening: the lamps are the warm key; the cool fill is the night sky through the north window, a soft blue wash
     // across the room and a moonlit patch on the floor below the sill
@@ -2752,6 +2787,7 @@
       .replace(/}\s*$/, '  gl_FragColor.rgb += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - .5) / 255.;\n}');
     composer.addPass(tilt);
 
+    await breathe();
     // ----- hotspots: a real button over each object, re-projected as the camera moves -----
     const spots = [];
     function spot(key, group, lift, label) {
@@ -2803,7 +2839,6 @@
     };
     // start here: the three strongest stories get the brightest dots
     for (const k of ['pagemd', 'dove', 'now']) buttons[k].classList.add('star');
-    view.append(...Object.values(buttons));
     // the drone's hotspot box rides along with it: keep its corners in the drone's own frame
     const doveSpot = spots.find(s => s.key === 'dove');
     doveSpot.local = doveSpot.corners.map(c => dove.worldToLocal(c.clone()));
@@ -2829,6 +2864,7 @@
         buckets.get(key).list.push(o);
       });
       for (const { root, mat, list } of buckets.values()) {
+        await breathe();
         if (list.length < 2 && mat === list[0].material) continue;
         inv.copy(root.matrixWorld).invert();
         const geo = mergeGeometries(list.map(o => {
@@ -3047,6 +3083,11 @@
       camera.aspect = w / h;
       invalidate();
     }
+    // compile off the main thread where the GPU driver allows it, so the first frame doesn't freeze the page; the target has to match the real render's
+    renderer.setRenderTarget(sceneRT);
+    await renderer.compileAsync(scene, camera);
+    renderer.setRenderTarget(null);
+    view.append(...Object.values(buttons));
     resize();
     new ResizeObserver(resize).observe(view);
     new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }).observe(view);
